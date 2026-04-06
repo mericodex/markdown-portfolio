@@ -1,0 +1,50 @@
+@media print {
+  /* Hide interactive chrome */
+  .app-header,
+  .tab-bar,
+  .global-timer,
+  .pwa-banner,
+  .btn-print-hide,
+  .tab-content > .tab-toolbar,
+  [data-no-print] { display: none !important; }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .print-page-break { page-break-after: always; }
+
+  /* Recipe print layout */
+  .recipe-print {
+    max-width: 100%;
+    padding: 0;
+  }
+  .recipe-print h1 { font-size: 20pt; margin-bottom: 8pt; }
+  .recipe-print .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4pt;
+    font-size: 9pt;
+  }
+
+  /* Cookbook print */
+  .cookbook-print-cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    page-break-after: always;
+    text-align: center;
+  }
+
+  /* Shopping list print */
+  .shopping-print-list {
+    columns: 2;
+    column-gap: 24pt;
+  }
+
+  a[href]::after { content: ''; } /* suppress URL printing */
+}

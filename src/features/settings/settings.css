@@ -1,0 +1,125 @@
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+  padding-bottom: calc(var(--tab-bar-height) + 16px);
+}
+
+.settings-section {
+  background: var(--color-card);
+  border-bottom: 8px solid var(--color-surface-alt);
+  padding: 20px 16px;
+}
+
+.settings-section-title {
+  font-size: var(--font-size-base);
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.settings-row:last-child { border-bottom: none; }
+
+.settings-row-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.settings-row-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* Palette swatches */
+.palette-swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.palette-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.palette-swatch-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.palette-swatch.selected .palette-swatch-dot {
+  border-color: var(--color-text);
+  transform: scale(1.1);
+}
+
+.palette-swatch-name {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  display: flex;
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.toggle-option {
+  padding: 7px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all var(--transition);
+}
+
+.toggle-option.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* API key section */
+.api-key-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: var(--font-size-sm);
+  font-family: monospace;
+  color: var(--color-text-muted);
+  overflow: hidden;
+}
+
+.api-key-masked {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

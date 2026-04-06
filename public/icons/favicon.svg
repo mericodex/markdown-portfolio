@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#c0392b"/>
+  <!-- Lady sketch -->
+  <circle cx="32" cy="14" r="7" stroke="white" stroke-width="2" fill="none"/>
+  <path d="M24 25c0-4.4 3.6-8 8-8s8 3.6 8 8v3H24v-3z" stroke="white" stroke-width="2" fill="none"/>
+  <path d="M20 28h24v18a10 10 0 01-20 0V28z" stroke="white" stroke-width="2" fill="none"/>
+  <!-- Spoon -->
+  <circle cx="46" cy="18" r="4" stroke="white" stroke-width="1.8" fill="none"/>
+  <line x1="46" y1="22" x2="46" y2="36" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,181 @@
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL   = 'claude-opus-4-6';
+
+async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
+  const messages = Array.isArray(userContent)
+    ? [{ role: 'user', content: userContent }]
+    : [{ role: 'user', content: userContent }];
+
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-allow-browser': 'true'
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system: systemPrompt, messages })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message ?? `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.content?.[0]?.text ?? '';
+}
+
+// ── Recipe Generation ──────────────────────────────────────────────────────
+
+const SYSTEM_RECIPE = `You are a helpful recipe assistant for a breastfeeding mama.
+ALL recipes must be safe for breastfeeding women (avoid high-mercury fish, alcohol, excessive caffeine, etc.).
+Respond ONLY with valid JSON — no markdown fences, no explanations outside the JSON.
+Format each recipe as:
+{
+  "title": "Recipe Name",
+  "description": "1-2 sentence description",
+  "prepTime": 10,
+  "cookTime": 20,
+  "servings": 4,
+  "tags": ["Main Dish", "Quick Meal"],
+  "ingredients": [{"name": "chicken breast", "quantity": 300, "unit": "g"}],
+  "steps": ["Step 1 text", "Step 2 text"],
+  "nutrition": {"calories": 350, "protein": 28, "carbs": 32, "fat": 12, "fibre": 4, "sugar": 6},
+  "breastfeedingSafe": true,
+  "breastfeedingNotes": "Optional note about why this is great for breastfeeding"
+}
+Return an array of exactly 4 recipe objects.`;
+
+export async function generateRecipes({ apiKey, mode, craving, pantryItems, category, settings }) {
+  let userMsg = '';
+  if (mode === 'craving') {
+    userMsg = `Generate 4 recipes based on this craving: "${craving}".`;
+  } else if (mode === 'pantry') {
+    const ingredients = pantryItems.map(i => `${i.name} (${i.quantity} ${i.unit ?? ''})`).join(', ');
+    userMsg = `Generate 4 recipes using some or all of these pantry ingredients: ${ingredients}.`;
+  } else {
+    userMsg = `Generate 4 completely surprising and delicious recipes — be creative!`;
+  }
+  if (category && category !== 'All') userMsg += ` Category: ${category}.`;
+  if (settings?.measurementSystem === 'imperial') userMsg += ' Use imperial measurements (oz, lbs, cups, °F).';
+  userMsg += ' Return a JSON array of exactly 4 recipes.';
+
+  const text = await callClaude(apiKey, SYSTEM_RECIPE, userMsg, 3000);
+  try {
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    throw new Error('Could not parse recipe response. Please try again.');
+  }
+}
+
+// ── Recipe Adjustment ─────────────────────────────────────────────────────
+
+export async function adjustRecipe({ apiKey, recipe, question, photoBase64 }) {
+  const systemPrompt = `You are a knowledgeable recipe assistant specialising in healthy substitutions, dietary adaptations, and breastfeeding safety. Give clear, practical suggestions.`;
+
+  const userContent = photoBase64
+    ? [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: 'image/jpeg', data: photoBase64 }
+        },
+        {
+          type: 'text',
+          text: question
+            ? `For the recipe in this image: ${question}`
+            : 'Please read this recipe and suggest improvements for a breastfeeding mama, including nutritional notes and any substitutions.'
+        }
+      ]
+    : `Recipe:\n${recipe}\n\nQuestion: ${question || 'How can I make this recipe breastfeeding-safe and more nutritious?'}`;
+
+  return callClaude(apiKey, systemPrompt, userContent, 1500);
+}
+
+// ── Cookbook AI Cover ─────────────────────────────────────────────────────
+
+export async function generateCookbookCover({ apiKey, cookbookName, recipes }) {
+  const titles = recipes.slice(0, 10).map(r => r.title).join(', ');
+  const prompt = `Create a charming cookbook cover description for a cookbook called "${cookbookName}" containing recipes like: ${titles || 'various home recipes'}.
+Return JSON: { "emoji": "🍳", "tagline": "A short, heartwarming tagline under 12 words", "style": "brief description of the cover aesthetic" }`;
+  const text = await callClaude(apiKey, 'You create whimsical, warm cookbook cover descriptions.', prompt, 200);
+  try {
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return { emoji: '📖', tagline: cookbookName, style: 'Classic' };
+  }
+}
+
+// ── Meal Plan AI Suggest ──────────────────────────────────────────────────
+
+export async function suggestMeal({ apiKey, day, mealType, existingRecipes, pantryItems }) {
+  const recipeNames = existingRecipes.slice(0, 20).map(r => r.title).join(', ');
+  const pantryNames = pantryItems.slice(0, 10).map(i => i.name).join(', ');
+  const prompt = `Suggest a single ${mealType} meal for ${day} for a breastfeeding mama.
+Available cookbook recipes: ${recipeNames || 'none'}.
+Available pantry items: ${pantryNames || 'general pantry'}.
+Return JSON: { "label": "Meal name or recipe title", "type": "recipe" or "custom", "portion": "1 portion" }`;
+  const text = await callClaude(apiKey, 'You are a helpful meal planning assistant for new mamas.', prompt, 200);
+  try {
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return { label: 'Healthy meal suggestion', type: 'custom', portion: '1 portion' };
+  }
+}
+
+// ── Pantry Photo ID ───────────────────────────────────────────────────────
+
+export async function identifyPantryItem({ apiKey, photoBase64, mimeType = 'image/jpeg' }) {
+  const userContent = [
+    {
+      type: 'image',
+      source: { type: 'base64', media_type: mimeType, data: photoBase64 }
+    },
+    {
+      type: 'text',
+      text: 'Identify the food item in this photo. Return JSON: { "name": "item name", "category": "Fridge|Freezer|Cupboard|Spices|Fresh Produce|Other", "unit": "g|ml|each|bunch|pack" }'
+    }
+  ];
+  const text = await callClaude(apiKey, 'You identify food items from photos accurately.', userContent, 200);
+  try {
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    return { name: 'Unknown item', category: 'Other', unit: 'each' };
+  }
+}
+
+// ── Import recipe from URL ────────────────────────────────────────────────
+
+export async function importRecipeFromText({ apiKey, text }) {
+  const systemPrompt = `Extract a structured recipe from the provided text. Return valid JSON matching this schema exactly:
+{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0}, "breastfeedingSafe":true, "breastfeedingNotes":"" }`;
+  const result = await callClaude(apiKey, systemPrompt, `Extract this recipe:\n\n${text.slice(0, 4000)}`, 2000);
+  try {
+    const cleaned = result.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    throw new Error('Could not extract recipe from text. Please try pasting a different format.');
+  }
+}
+
+// ── Import recipe from photo ──────────────────────────────────────────────
+
+export async function importRecipeFromPhoto({ apiKey, photoBase64, mimeType = 'image/jpeg' }) {
+  const systemPrompt = `Extract a structured recipe from the photo of a recipe book or card. Return valid JSON matching this schema exactly:
+{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0}, "breastfeedingSafe":true, "breastfeedingNotes":"" }`;
+  const userContent = [
+    { type: 'image', source: { type: 'base64', media_type: mimeType, data: photoBase64 } },
+    { type: 'text', text: 'Extract the recipe from this image.' }
+  ];
+  const result = await callClaude(apiKey, systemPrompt, userContent, 2000);
+  try {
+    const cleaned = result.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    throw new Error('Could not extract recipe from photo.');
+  }
+}
