@@ -5,24 +5,30 @@ const API_URL = import.meta.env.DEV
 const MODEL   = 'claude-opus-4-6';
 
 async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
-  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
-    throw new Error('Invalid API key. Go to Settings and check your Anthropic API key.');
+  const key = (apiKey ?? '').trim();
+  if (!key) {
+    throw new Error('No API key set. Go to Settings and enter your Anthropic API key.');
   }
 
   const messages = Array.isArray(userContent)
     ? [{ role: 'user', content: userContent }]
     : [{ role: 'user', content: userContent }];
 
+  // Only send the browser header when calling the API directly (not through proxy)
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': key,
+    'anthropic-version': '2023-06-01',
+  };
+  if (!import.meta.env.DEV) {
+    headers['anthropic-dangerous-allow-browser'] = 'true';
+  }
+
   let res;
   try {
     res = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
-      },
+      headers,
       body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system: systemPrompt, messages })
     });
   } catch (networkErr) {

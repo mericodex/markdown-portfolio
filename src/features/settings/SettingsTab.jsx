@@ -2,11 +2,11 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import './settings.css';
 
 const PALETTES = [
-  { id: 'rose',     name: 'Rose',     color: '#c0392b' },
-  { id: 'ocean',    name: 'Ocean',    color: '#1a6b8a' },
-  { id: 'sunset',   name: 'Sunset',   color: '#d35400' },
-  { id: 'lavender', name: 'Lavender', color: '#7d3c98' },
-  { id: 'forest',   name: 'Forest',   color: '#1e6b3c' },
+  { id: 'rose',     name: 'Atelier', color: '#1A1A1A' },
+  { id: 'ocean',    name: 'Ocean',   color: '#0F3D52' },
+  { id: 'sunset',   name: 'Sunset',  color: '#8B2500' },
+  { id: 'lavender', name: 'Violet',  color: '#4A2272' },
+  { id: 'forest',   name: 'Forest',  color: '#16502E' },
 ];
 
 export default function SettingsTab({ apiKey, settings, setSettings, onApiKeyReset }) {
@@ -144,7 +144,7 @@ export default function SettingsTab({ apiKey, settings, setSettings, onApiKeyRes
         <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
             <strong>Mama's Kitchen</strong> v1.0<br />
-            An AI-powered recipe companion designed for breastfeeding mamas. All AI features are powered by Anthropic's Claude API using your personal key.<br /><br />
+            An AI-powered recipe companion. All AI features are powered by Anthropic's Claude API using your personal key.<br /><br />
             Your data is stored locally on this device only — nothing is sent to any server except Claude API calls.
           </p>
         </div>
