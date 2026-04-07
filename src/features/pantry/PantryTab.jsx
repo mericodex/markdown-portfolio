@@ -2,12 +2,23 @@ import { useState, useMemo } from 'react';
 import AddItemModal from './AddItemModal';
 import Toast from '../../components/Toast';
 import TagPill from '../../components/TagPill';
+import ShareButton from '../../components/ShareButton';
 import { formatExpiry, formatCurrency } from '../../utils/formatters';
 import { PANTRY_CATEGORIES } from '../../context/reducers/pantryReducer';
 import useAppContext from '../../hooks/useAppContext';
 import './pantry.css';
 
 const SORT_OPTIONS = ['Default', 'A–Z', 'Expiry Date'];
+
+function getPantryShareText(items) {
+  if (!items.length) return 'Pantry is empty.';
+  const lines = items.map(i => {
+    const cost = i.totalCost ? ` — R${Number(i.totalCost).toFixed(2)}` : '';
+    const expiry = i.expiryDate ? ` (expires ${i.expiryDate})` : '';
+    return `• ${i.name}: ${i.quantity} ${i.unit}${cost}${expiry}`;
+  });
+  return `My Pantry (${items.length} items)\n\n${lines.join('\n')}`;
+}
 
 export default function PantryTab({ apiKey, settings }) {
   const { pantry, pantryDispatch } = useAppContext();
@@ -22,8 +33,8 @@ export default function PantryTab({ apiKey, settings }) {
     let items = pantry.items;
     if (catFilter !== 'All') items = items.filter(i => i.category === catFilter);
     if (search) items = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase()));
-    if (sortBy === 'A–Z')         items = [...items].sort((a,b) => a.name.localeCompare(b.name));
-    if (sortBy === 'Expiry Date')  items = [...items].sort((a,b) => {
+    if (sortBy === 'A–Z')        items = [...items].sort((a,b) => a.name.localeCompare(b.name));
+    if (sortBy === 'Expiry Date') items = [...items].sort((a,b) => {
       if (!a.expiryDate) return 1;
       if (!b.expiryDate) return -1;
       return new Date(a.expiryDate) - new Date(b.expiryDate);
@@ -31,7 +42,6 @@ export default function PantryTab({ apiKey, settings }) {
     return items;
   }, [pantry.items, catFilter, sortBy, search]);
 
-  // Category counts
   const catCounts = useMemo(() => {
     const counts = { All: pantry.items.length };
     PANTRY_CATEGORIES.forEach(c => {
@@ -79,6 +89,7 @@ export default function PantryTab({ apiKey, settings }) {
         <select className="select" style={{width:'auto'}} value={sortBy} onChange={e => setSortBy(e.target.value)}>
           {SORT_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+        <ShareButton title="My Pantry" getText={() => getPantryShareText(filtered)} />
       </div>
 
       {/* Category filter */}
@@ -103,6 +114,11 @@ export default function PantryTab({ apiKey, settings }) {
         )}
         {filtered.map(item => {
           const expiry = item.expiryDate ? formatExpiry(item.expiryDate) : null;
+          const costDisplay = item.totalCost
+            ? formatCurrency(item.totalCost, settings?.currency)
+            : item.costPerUnit  // backwards compat with old data
+              ? formatCurrency(item.costPerUnit * item.quantity, settings?.currency)
+              : null;
           return (
             <div key={item.id} className="pantry-item">
               <div className="pantry-item-main">
@@ -110,7 +126,7 @@ export default function PantryTab({ apiKey, settings }) {
                 <div className="pantry-item-meta">
                   {item.quantity} {item.unit}
                   {item.portions ? ` · ${item.portions} portions` : ''}
-                  {item.costPerUnit ? ` · ${formatCurrency(item.costPerUnit * item.quantity, settings?.currency)}` : ''}
+                  {costDisplay ? ` · ${costDisplay}` : ''}
                 </div>
                 <div className="pantry-item-badges">
                   <span className="badge badge-blue">{item.category}</span>
@@ -131,12 +147,15 @@ export default function PantryTab({ apiKey, settings }) {
       {/* FAB */}
       <button className="pantry-fab" onClick={() => setShowAdd(true)} aria-label="Add pantry item">+</button>
 
+      {/* key forces remount when switching between add/edit so fields populate correctly */}
       <AddItemModal
+        key={editItem?.id ?? 'new'}
         isOpen={showAdd}
         onClose={closeModal}
         onSave={handleSave}
         editItem={editItem}
         apiKey={apiKey}
+        settings={settings}
       />
     </div>
   );

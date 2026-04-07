@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Modal from '../../components/Modal';
-import { importRecipeFromText, importRecipeFromPhoto } from '../../services/claudeApi';
+import { importRecipeFromUrl, importRecipeFromText, importRecipeFromPhoto } from '../../services/claudeApi';
 import { normaliseRecipe } from '../../utils/recipeParser';
 
 const MANUAL_BLANK = {
@@ -19,16 +19,11 @@ export default function ImportModal({ isOpen, onClose, onImport, apiKey }) {
   async function handleUrlImport() {
     setLoading(true); setError(null);
     try {
-      // Fetch page text via a CORS proxy or direct (many food blogs allow CORS)
-      const res = await fetch(url);
-      const html = await res.text();
-      // Strip HTML tags to get plain text
-      const text = html.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim();
-      const recipe = await importRecipeFromText({ apiKey, text });
+      const recipe = await importRecipeFromUrl({ apiKey, url });
       onImport(normaliseRecipe(recipe));
       onClose();
     } catch (e) {
-      setError('Could not import from URL. Try pasting the recipe text instead, or use the photo option.');
+      setError(e.message ?? 'Could not import from URL. Try pasting the recipe text instead, or use the photo option.');
     } finally {
       setLoading(false);
     }

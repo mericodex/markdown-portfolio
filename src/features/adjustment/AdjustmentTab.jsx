@@ -5,12 +5,14 @@ import './adjustment.css';
 const QUICK_QUESTIONS = [
   'Make it dairy-free',
   'Reduce calories',
-  'Make it breastfeeding safe',
   'Make it gluten-free',
+  'Make it diabetic friendly',
+  'Make it vegan',
   'Reduce cooking time',
   'Make it higher protein',
   'Suggest ingredient substitutions',
-  'Increase fibre content'
+  'Increase fibre content',
+  'Make it nut-free',
 ];
 
 export default function AdjustmentTab({ apiKey }) {

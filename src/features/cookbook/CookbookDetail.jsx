@@ -2,9 +2,20 @@ import { useState, useMemo } from 'react';
 import RecipeCard from '../recipes/RecipeCard';
 import TagPill from '../../components/TagPill';
 import Toast from '../../components/Toast';
+import ShareButton from '../../components/ShareButton';
 import { generateCookbookCover } from '../../services/claudeApi';
 import { formatCurrency } from '../../utils/formatters';
 import useAppContext from '../../hooks/useAppContext';
+
+function getCookbookShareText(cookbookName, recipes) {
+  if (!recipes.length) return `${cookbookName}\n\n(No recipes yet)`;
+  const list = recipes.map((r, i) => {
+    const ings = r.ingredients?.map(ing => `    - ${ing.quantity} ${ing.unit} ${ing.name}`).join('\n') ?? '';
+    const steps = r.steps?.map((s, si) => `    ${si + 1}. ${s}`).join('\n') ?? '';
+    return `${i + 1}. ${r.title}\n  Serves ${r.servings} | Prep ${r.prepTime}min | Cook ${r.cookTime}min\n\n  Ingredients:\n${ings}\n\n  Method:\n${steps}`;
+  }).join('\n\n---\n\n');
+  return `📖 ${cookbookName}\n\n${list}`;
+}
 
 const FONT_SIZES = { XS: '12px', S: '14px', M: '16px', L: '18px', XL: '20px' };
 const SORT_OPTIONS = ['Default', 'A–Z', 'Newest'];
@@ -111,6 +122,11 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
           <button className="btn btn-sm" style={{color:'#fff',background:'rgba(255,255,255,0.2)'}} onClick={handlePrint}>
             🖨 Print All
           </button>
+          <ShareButton
+            title={cookbook.name}
+            getText={() => getCookbookShareText(cookbook.name, recipes)}
+            style={{background:'rgba(255,255,255,0.2)',color:'#fff',borderColor:'transparent'}}
+          />
         </div>
       </div>
 

@@ -1,22 +1,20 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import NutritionPanel from './NutritionPanel';
 import CookMode from './CookMode';
 import TagPill from '../../components/TagPill';
+import ShareButton from '../../components/ShareButton';
 import { scaleIngredients } from '../../utils/scaling';
 import { formatTime } from '../../utils/formatters';
 import useAppContext from '../../hooks/useAppContext';
 
-const COOKBOOK_COLORS = ['#c0392b','#1a6b8a','#d35400','#7d3c98','#1e6b3c','#c07a2b','#2980b9'];
-
 export default function RecipeCard({ recipe, settings, index, showSaveButton = true }) {
   const { cookbook, cookbookDispatch } = useAppContext();
-  const [expanded, setExpanded]   = useState(false);
-  const [servings, setServings]   = useState(recipe.servings ?? 4);
-  const [cookMode, setCookMode]   = useState(false);
-  const [saved, setSaved]         = useState(false);
+  const [expanded, setExpanded]     = useState(false);
+  const [servings, setServings]     = useState(recipe.servings ?? 4);
+  const [cookMode, setCookMode]     = useState(false);
+  const [saved, setSaved]           = useState(false);
   const [targetBook, setTargetBook] = useState(cookbook.cookbooks[0]?.id ?? 'default');
   const [showSavePanel, setShowSavePanel] = useState(false);
-  const photoRef = useRef(null);
 
   const scaledIngredients = scaleIngredients(recipe.ingredients ?? [], recipe.servings ?? 4, servings);
 
@@ -30,16 +28,6 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
     setTimeout(() => setSaved(false), 3000);
   }
 
-  function handlePhotoChange(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      // In a real implementation this would call updateRecipe; here we show it inline
-    };
-    reader.readAsDataURL(file);
-  }
-
   function handlePrint() {
     const prev = document.title;
     document.title = recipe.title;
@@ -47,12 +35,21 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
     document.title = prev;
   }
 
+  function getShareText() {
+    const ings = scaledIngredients.map(i => `  - ${i.quantity} ${i.unit} ${i.name}`).join('\n');
+    const steps = recipe.steps?.map((s, i) => `  ${i + 1}. ${s}`).join('\n') ?? '';
+    const nutrition = recipe.nutrition
+      ? `\nNutrition (per serving): ${recipe.nutrition.calories}kcal | Protein: ${recipe.nutrition.protein}g | Carbs: ${recipe.nutrition.carbs}g | Fat: ${recipe.nutrition.fat}g`
+      : '';
+    return `${recipe.title}\nPrep: ${recipe.prepTime}min | Cook: ${recipe.cookTime}min | Serves: ${servings}\n\n${recipe.description ?? ''}\n\nIngredients:\n${ings}\n\nMethod:\n${steps}${nutrition}`;
+  }
+
   return (
     <>
-      {cookMode && <CookMode recipe={{ ...recipe, steps: recipe.steps }} onClose={() => setCookMode(false)} />}
+      {cookMode && <CookMode recipe={recipe} onClose={() => setCookMode(false)} />}
 
       <div className={`recipe-card card${expanded ? ' recipe-card-expanded' : ''}`}>
-        {/* Card header — always visible */}
+        {/* Card header */}
         <button
           className="recipe-card-header"
           onClick={() => setExpanded(e => !e)}
@@ -68,9 +65,6 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
             </div>
           </div>
           <div className="recipe-card-header-right">
-            {recipe.breastfeedingSafe && (
-              <span className="badge badge-green recipe-bf-badge" title="Breastfeeding safe">🤱 BF Safe</span>
-            )}
             <span className="recipe-card-chevron">{expanded ? '▲' : '▼'}</span>
           </div>
         </button>
@@ -85,17 +79,8 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
         {/* Expanded content */}
         {expanded && (
           <div className="recipe-card-body">
-            {/* Description */}
             {recipe.description && (
               <p className="recipe-description">{recipe.description}</p>
-            )}
-
-            {/* Breastfeeding note */}
-            {recipe.breastfeedingNotes && (
-              <div className="recipe-bf-note">
-                <span>🤱</span>
-                <span>{recipe.breastfeedingNotes}</span>
-              </div>
             )}
 
             {/* Servings adjuster */}
@@ -145,6 +130,7 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
               <button className="btn btn-secondary btn-sm" onClick={handlePrint}>
                 🖨 Print
               </button>
+              <ShareButton title={recipe.title} getText={getShareText} />
               {showSaveButton && (
                 <button
                   className={`btn btn-sm ${saved ? 'btn-secondary' : 'btn-primary'}`}

@@ -28,8 +28,7 @@ async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
 
 // ── Recipe Generation ──────────────────────────────────────────────────────
 
-const SYSTEM_RECIPE = `You are a helpful recipe assistant for a breastfeeding mama.
-ALL recipes must be safe for breastfeeding women (avoid high-mercury fish, alcohol, excessive caffeine, etc.).
+const SYSTEM_RECIPE = `You are a helpful recipe assistant.
 Respond ONLY with valid JSON — no markdown fences, no explanations outside the JSON.
 Format each recipe as:
 {
@@ -41,13 +40,11 @@ Format each recipe as:
   "tags": ["Main Dish", "Quick Meal"],
   "ingredients": [{"name": "chicken breast", "quantity": 300, "unit": "g"}],
   "steps": ["Step 1 text", "Step 2 text"],
-  "nutrition": {"calories": 350, "protein": 28, "carbs": 32, "fat": 12, "fibre": 4, "sugar": 6},
-  "breastfeedingSafe": true,
-  "breastfeedingNotes": "Optional note about why this is great for breastfeeding"
+  "nutrition": {"calories": 350, "protein": 28, "carbs": 32, "fat": 12, "fibre": 4, "sugar": 6}
 }
 Return an array of exactly 4 recipe objects.`;
 
-export async function generateRecipes({ apiKey, mode, craving, pantryItems, category, settings }) {
+export async function generateRecipes({ apiKey, mode, craving, pantryItems, category, dietaryFilters = [], settings }) {
   let userMsg = '';
   if (mode === 'craving') {
     userMsg = `Generate 4 recipes based on this craving: "${craving}".`;
@@ -58,6 +55,7 @@ export async function generateRecipes({ apiKey, mode, craving, pantryItems, cate
     userMsg = `Generate 4 completely surprising and delicious recipes — be creative!`;
   }
   if (category && category !== 'All') userMsg += ` Category: ${category}.`;
+  if (dietaryFilters.length > 0) userMsg += ` Dietary requirements: ${dietaryFilters.join(', ')}.`;
   if (settings?.measurementSystem === 'imperial') userMsg += ' Use imperial measurements (oz, lbs, cups, °F).';
   userMsg += ' Return a JSON array of exactly 4 recipes.';
 
@@ -73,7 +71,7 @@ export async function generateRecipes({ apiKey, mode, craving, pantryItems, cate
 // ── Recipe Adjustment ─────────────────────────────────────────────────────
 
 export async function adjustRecipe({ apiKey, recipe, question, photoBase64 }) {
-  const systemPrompt = `You are a knowledgeable recipe assistant specialising in healthy substitutions, dietary adaptations, and breastfeeding safety. Give clear, practical suggestions.`;
+  const systemPrompt = `You are a knowledgeable recipe assistant specialising in healthy substitutions, dietary adaptations, and nutritional improvements. Give clear, practical suggestions.`;
 
   const userContent = photoBase64
     ? [
@@ -85,10 +83,10 @@ export async function adjustRecipe({ apiKey, recipe, question, photoBase64 }) {
           type: 'text',
           text: question
             ? `For the recipe in this image: ${question}`
-            : 'Please read this recipe and suggest improvements for a breastfeeding mama, including nutritional notes and any substitutions.'
+            : 'Please read this recipe and suggest improvements, including nutritional notes and any substitutions.'
         }
       ]
-    : `Recipe:\n${recipe}\n\nQuestion: ${question || 'How can I make this recipe breastfeeding-safe and more nutritious?'}`;
+    : `Recipe:\n${recipe}\n\nQuestion: ${question || 'How can I make this recipe more nutritious and suggest any useful substitutions?'}`;
 
   return callClaude(apiKey, systemPrompt, userContent, 1500);
 }
@@ -113,11 +111,11 @@ Return JSON: { "emoji": "🍳", "tagline": "A short, heartwarming tagline under 
 export async function suggestMeal({ apiKey, day, mealType, existingRecipes, pantryItems }) {
   const recipeNames = existingRecipes.slice(0, 20).map(r => r.title).join(', ');
   const pantryNames = pantryItems.slice(0, 10).map(i => i.name).join(', ');
-  const prompt = `Suggest a single ${mealType} meal for ${day} for a breastfeeding mama.
+  const prompt = `Suggest a single ${mealType} meal for ${day}.
 Available cookbook recipes: ${recipeNames || 'none'}.
 Available pantry items: ${pantryNames || 'general pantry'}.
 Return JSON: { "label": "Meal name or recipe title", "type": "recipe" or "custom", "portion": "1 portion" }`;
-  const text = await callClaude(apiKey, 'You are a helpful meal planning assistant for new mamas.', prompt, 200);
+  const text = await callClaude(apiKey, 'You are a helpful meal planning assistant.', prompt, 200);
   try {
     const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
     return JSON.parse(cleaned);
@@ -150,9 +148,31 @@ export async function identifyPantryItem({ apiKey, photoBase64, mimeType = 'imag
 
 // ── Import recipe from URL ────────────────────────────────────────────────
 
+export async function importRecipeFromUrl({ apiKey, url }) {
+  // Use CORS proxy to fetch page content
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  let text = '';
+  try {
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('Could not fetch page');
+    const html = await res.text();
+    // Strip HTML tags, collapse whitespace
+    text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .slice(0, 5000);
+  } catch {
+    throw new Error('Could not load the page. Try pasting the recipe text manually instead.');
+  }
+  return importRecipeFromText({ apiKey, text });
+}
+
 export async function importRecipeFromText({ apiKey, text }) {
   const systemPrompt = `Extract a structured recipe from the provided text. Return valid JSON matching this schema exactly:
-{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0}, "breastfeedingSafe":true, "breastfeedingNotes":"" }`;
+{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0} }`;
   const result = await callClaude(apiKey, systemPrompt, `Extract this recipe:\n\n${text.slice(0, 4000)}`, 2000);
   try {
     const cleaned = result.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
@@ -166,7 +186,7 @@ export async function importRecipeFromText({ apiKey, text }) {
 
 export async function importRecipeFromPhoto({ apiKey, photoBase64, mimeType = 'image/jpeg' }) {
   const systemPrompt = `Extract a structured recipe from the photo of a recipe book or card. Return valid JSON matching this schema exactly:
-{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0}, "breastfeedingSafe":true, "breastfeedingNotes":"" }`;
+{ "title":"", "description":"", "prepTime":0, "cookTime":0, "servings":4, "tags":[], "ingredients":[{"name":"","quantity":0,"unit":""}], "steps":[], "nutrition":{"calories":0,"protein":0,"carbs":0,"fat":0,"fibre":0,"sugar":0} }`;
   const userContent = [
     { type: 'image', source: { type: 'base64', media_type: mimeType, data: photoBase64 } },
     { type: 'text', text: 'Extract the recipe from this image.' }

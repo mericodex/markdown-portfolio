@@ -17,22 +17,29 @@
   color: #fff;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  justify-content: space-between;
+  padding: 0 12px;
   box-shadow: var(--shadow-md);
-  gap: 12px;
 }
 
-.app-header-logo {
+/* Centered title block */
+.app-header-center {
   display: flex;
   align-items: center;
   gap: 10px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none; /* let clicks pass through to burger */
 }
 
-.app-header-logo svg {
-  width: 36px;
-  height: 36px;
+.app-header-center svg {
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
+
+.app-header-titles { text-align: center; }
 
 .app-header-title {
   font-size: var(--font-size-lg);
@@ -45,6 +52,119 @@
   font-size: var(--font-size-xs);
   opacity: 0.8;
   letter-spacing: 0.03em;
+}
+
+/* ── Burger button ── */
+.burger-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  border: none;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.burger-btn:hover { background: rgba(255,255,255,0.25); }
+
+.burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+/* ── Burger drawer ── */
+.burger-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 150;
+  animation: fadeIn 150ms ease;
+}
+
+.burger-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(280px, 85vw);
+  background: var(--color-card);
+  z-index: 151;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: slideRight 200ms ease;
+  overflow-y: auto;
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.burger-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.burger-drawer-header svg {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.burger-drawer-title {
+  flex: 1;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.burger-close {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+}
+
+.burger-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.burger-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition);
+}
+.burger-nav-item:hover { background: var(--color-surface-alt); }
+.burger-nav-item span:first-child { font-size: 1.3rem; width: 28px; text-align: center; }
+
+.burger-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
 }
 
 /* ── PWA install banner ── */

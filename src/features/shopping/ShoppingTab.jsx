@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import Toast from '../../components/Toast';
 import Modal from '../../components/Modal';
+import ShareButton from '../../components/ShareButton';
 import useAppContext from '../../hooks/useAppContext';
 import './shopping.css';
+
+function getListShareText(list) {
+  if (!list) return '';
+  const lines = list.items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${i.quantity ? ` — ${i.quantity} ${i.unit}` : ''}`);
+  return `${list.name}\n\n${lines.join('\n')}`;
+}
 
 export default function ShoppingTab({ settings }) {
   const { shopping, shoppingDispatch, cookbook } = useAppContext();
@@ -77,6 +84,7 @@ export default function ShoppingTab({ settings }) {
       {/* Toolbar */}
       <div className="shopping-toolbar">
         <span style={{ fontWeight: 700, fontSize: 'var(--font-size-lg)', flex: 1 }}>Shopping</span>
+        <ShareButton title={activeList?.name ?? 'Shopping List'} getText={() => getListShareText(activeList)} />
         <button className="btn btn-secondary btn-sm" onClick={handlePrint}>🖨 Print</button>
         <button className="btn btn-primary btn-sm" onClick={() => setShowNewList(true)}>+ List</button>
       </div>

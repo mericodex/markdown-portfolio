@@ -2,21 +2,46 @@ import { useState } from 'react';
 import { generateRecipes } from '../../services/claudeApi';
 import { normaliseRecipe } from '../../utils/recipeParser';
 import RecipeCard from './RecipeCard';
+import ShareButton from '../../components/ShareButton';
 import useAppContext from '../../hooks/useAppContext';
 import './recipes.css';
 
 const CATEGORIES = ['All', 'Main Dish', 'Dessert', 'Starter', 'Quick Meal', 'Breakfast', 'Salad', 'Soup', 'Snack', 'Baking'];
 
+const DIETARY_OPTIONS = [
+  'Gluten Free',
+  'Dairy Free',
+  'Diabetic Friendly',
+  'Breastfeeding Safe',
+  'Vegan',
+  'Vegetarian',
+  'Low Carb',
+  'High Protein',
+  'Nut Free',
+  'Low Sodium',
+];
+
+function getShareText(recipes) {
+  if (!recipes.length) return '';
+  return recipes.map(r => {
+    const ings = r.ingredients?.map(i => `  - ${i.quantity} ${i.unit} ${i.name}`).join('\n') ?? '';
+    const steps = r.steps?.map((s, i) => `  ${i + 1}. ${s}`).join('\n') ?? '';
+    return `${r.title}\nPrep: ${r.prepTime}min | Cook: ${r.cookTime}min | Serves: ${r.servings}\n\nIngredients:\n${ings}\n\nMethod:\n${steps}`;
+  }).join('\n\n---\n\n');
+}
+
 export default function RecipesTab({ apiKey, settings }) {
   const { pantry } = useAppContext();
-  const [mode, setMode]         = useState('craving');   // 'craving' | 'pantry' | 'surprise'
-  const [craving, setCraving]   = useState('');
-  const [category, setCategory] = useState('All');
+  const [mode, setMode]           = useState('craving');
+  const [craving, setCraving]     = useState('');
+  const [category, setCategory]   = useState('All');
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [useAllPantry, setUseAllPantry]   = useState(true);
-  const [recipes, setRecipes]   = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [dietaryFilters, setDietaryFilters] = useState([]);
+  const [showDietary, setShowDietary]       = useState(false);
+  const [recipes, setRecipes]     = useState([]);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState(null);
 
   const pantryItems = pantry.items;
 
@@ -28,6 +53,12 @@ export default function RecipesTab({ apiKey, settings }) {
     });
   }
 
+  function toggleDietary(opt) {
+    setDietaryFilters(prev =>
+      prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt]
+    );
+  }
+
   async function handleGenerate() {
     setLoading(true);
     setError(null);
@@ -36,7 +67,7 @@ export default function RecipesTab({ apiKey, settings }) {
       const items = mode === 'pantry'
         ? (useAllPantry ? pantryItems : pantryItems.filter(i => selectedItems.has(i.id)))
         : [];
-      const raw = await generateRecipes({ apiKey, mode, craving, pantryItems: items, category, settings });
+      const raw = await generateRecipes({ apiKey, mode, craving, pantryItems: items, category, dietaryFilters, settings });
       setRecipes(Array.isArray(raw) ? raw.map(normaliseRecipe) : []);
     } catch (e) {
       setError(e.message ?? 'Something went wrong. Please try again.');
@@ -116,6 +147,30 @@ export default function RecipesTab({ apiKey, settings }) {
           </div>
         )}
 
+        {/* Dietary filters */}
+        <div>
+          <button
+            className={`btn btn-sm ${showDietary ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setShowDietary(s => !s)}
+          >
+            🥗 Dietary Filters {dietaryFilters.length > 0 ? `(${dietaryFilters.length})` : ''}
+          </button>
+          {showDietary && (
+            <div className="dietary-options">
+              {DIETARY_OPTIONS.map(opt => (
+                <label key={opt} className="pantry-checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={dietaryFilters.includes(opt)}
+                    onChange={() => toggleDietary(opt)}
+                  />
+                  <span>{opt}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Category + generate */}
         <div className="category-row">
           <select
@@ -151,7 +206,12 @@ export default function RecipesTab({ apiKey, settings }) {
           <div className="empty-state">
             <div className="empty-icon">🍳</div>
             <p>Choose a mode above and tap <strong>Generate</strong> to get 4 personalised recipes.</p>
-            <p style={{fontSize:'var(--font-size-xs)'}}>All recipes are filtered for breastfeeding safety.</p>
+          </div>
+        )}
+
+        {recipes.length > 0 && (
+          <div style={{display:'flex', justifyContent:'flex-end', marginBottom:8}}>
+            <ShareButton title="My Recipes" getText={() => getShareText(recipes)} />
           </div>
         )}
 

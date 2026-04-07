@@ -194,6 +194,31 @@ a { color: var(--color-primary); text-decoration: none; }
   padding-bottom: calc(var(--tab-bar-height) + 16px);
 }
 
+/* ── Toggle switch (shared) ── */
+.toggle-switch {
+  display: flex;
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.toggle-option {
+  padding: 7px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all var(--transition);
+}
+
+.toggle-option.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 /* ── Badge ── */
 .badge {
   display: inline-flex;
