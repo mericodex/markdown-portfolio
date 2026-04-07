@@ -25,11 +25,11 @@ const TABS = [
 function LogoSVG() {
   return (
     <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="18" cy="7" r="4.5" stroke="white" strokeWidth="1.5" fill="none"/>
-      <path d="M13 14c0-2.76 2.24-5 5-5s5 2.24 5 5v2H13v-2z" stroke="white" strokeWidth="1.5" fill="none"/>
-      <path d="M10 16h16v12a6 6 0 01-12 0V16z" stroke="white" strokeWidth="1.5" fill="none"/>
-      <path d="M25 10c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z" stroke="white" strokeWidth="1.2" fill="none"/>
-      <line x1="22" y1="13" x2="22" y2="22" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="18" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+      <path d="M13 14c0-2.76 2.24-5 5-5s5 2.24 5 5v2H13v-2z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+      <path d="M10 16h16v12a6 6 0 01-12 0V16z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+      <path d="M25 10c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+      <line x1="22" y1="13" x2="22" y2="22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }

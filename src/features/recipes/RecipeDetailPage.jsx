@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import ShareButton from '../../components/ShareButton';
 import NutritionPanel from './NutritionPanel';
+import AddRecipeModal from '../../components/AddRecipeModal';
 import { scaleIngredients } from '../../utils/scaling';
 import { formatTime } from '../../utils/formatters';
 import useAppContext from '../../hooks/useAppContext';
 import './RecipeDetailPage.css';
 
-export default function RecipeDetailPage({ recipe, onBack, showSaveButton = true, settings }) {
+export default function RecipeDetailPage({ recipe: initialRecipe, onBack, showSaveButton = true, settings, allowEdit = false }) {
   const { cookbook, cookbookDispatch } = useAppContext();
+
+  // recipe may be updated via edit, so track locally
+  const [recipe, setRecipe] = useState(initialRecipe);
+  const [showEdit, setShowEdit]     = useState(false);
 
   const [servings, setServings]     = useState(recipe.servings ?? 4);
   const [checked, setChecked]       = useState(() => (recipe.ingredients ?? []).map(() => false));
@@ -15,6 +20,16 @@ export default function RecipeDetailPage({ recipe, onBack, showSaveButton = true
   const [saved, setSaved]           = useState(false);
   const [targetBook, setTargetBook] = useState(cookbook.cookbooks[0]?.id ?? 'default');
   const [showSavePanel, setShowSavePanel] = useState(false);
+
+  // recipe is in the cookbook if it has an id stored in cookbook.recipes
+  const inCookbook = cookbook.recipes.some(r => r.id === recipe.id);
+  const canEditDelete = allowEdit || inCookbook;
+
+  function handleDelete() {
+    if (!window.confirm(`Delete "${recipe.title}"?`)) return;
+    cookbookDispatch({ type: 'DELETE_RECIPE', id: recipe.id });
+    onBack();
+  }
 
   const scaledIngredients = scaleIngredients(recipe.ingredients ?? [], recipe.servings ?? 4, servings);
 
@@ -42,6 +57,14 @@ export default function RecipeDetailPage({ recipe, onBack, showSaveButton = true
   const allChecked = checked.length > 0 && checked.every(Boolean);
 
   return (
+    <>
+    <AddRecipeModal
+      isOpen={showEdit}
+      onClose={() => setShowEdit(false)}
+      editRecipe={recipe}
+      onSaved={updated => setRecipe(r => ({ ...r, ...updated }))}
+    />
+
     <div className="rdp-page">
       {/* Hero */}
       <div className="rdp-hero">
@@ -50,6 +73,12 @@ export default function RecipeDetailPage({ recipe, onBack, showSaveButton = true
         </button>
         <div className="rdp-hero-actions">
           <ShareButton title={recipe.title} getText={getShareText} style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', borderColor: 'transparent', fontSize: '0.75rem', padding: '6px 12px' }} />
+          {canEditDelete && (
+            <button className="rdp-hero-action-btn" onClick={() => setShowEdit(true)}>✏️ Edit</button>
+          )}
+          {canEditDelete && (
+            <button className="rdp-hero-action-btn rdp-hero-action-delete" onClick={handleDelete}>🗑</button>
+          )}
         </div>
         <div className="rdp-hero-content">
           {recipe.tags?.length > 0 && (
@@ -186,5 +215,6 @@ export default function RecipeDetailPage({ recipe, onBack, showSaveButton = true
         <div style={{ height: 'calc(var(--tab-bar-height) + 24px)' }} />
       </div>
     </div>
+    </>
   );
 }

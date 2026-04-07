@@ -1,27 +1,30 @@
 /* ── Mama's Kitchen – Design Tokens ─────────────────────────────────────── */
 
-/* ── Default palette: Atelier (warm ivory + gold + charcoal) ── */
 :root {
-  --color-primary:       #1A1A1A;
-  --color-primary-light: #333333;
+  /* ── Culinary palette (default) ── */
+  --color-primary:       #141210;
+  --color-primary-light: #2A2520;
   --color-primary-dark:  #000000;
-  --color-accent:        #B8913A;
-  --color-accent-light:  #CDA85A;
-  --color-surface:       #FAFAF7;
-  --color-surface-alt:   #F2F0EA;
+  --color-accent:        #E5622A;
+  --color-accent-light:  #F07848;
+  --color-surface:       #F7F5F0;
+  --color-surface-alt:   #EFECEA;
   --color-card:          #FFFFFF;
-  --color-border:        #E6E3D9;
-  --color-text:          #1A1A1A;
-  --color-text-muted:    #787870;
+  --color-border:        #E6E2D8;
+  --color-text:          #141210;
+  --color-text-muted:    #6A655C;
   --color-success:       #2D6A4F;
-  --color-warning:       #B8913A;
-  --color-danger:        #B5362B;
+  --color-warning:       #C4922A;
+  --color-danger:        #C0392B;
   --color-info:          #1A4A72;
 
-  --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
-  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Floating tab overlay */
+  --tab-overlay: rgba(20,18,16,0.95);
 
-  --font-size-xs:   0.75rem;
+  --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --font-size-xs:   0.72rem;
   --font-size-sm:   0.8125rem;
   --font-size-base: 1rem;
   --font-size-lg:   1.125rem;
@@ -29,94 +32,109 @@
   --font-size-2xl:  1.5rem;
   --font-size-3xl:  1.875rem;
 
-  --radius-sm:   3px;
-  --radius-md:   6px;
-  --radius-lg:   12px;
-  --radius-xl:   20px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   14px;
+  --radius-xl:   22px;
   --radius-full: 9999px;
 
-  --shadow-sm:  0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg:  0 12px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,0.18);
+  --shadow-float: 0 16px 48px rgba(0,0,0,0.28), 0 4px 12px rgba(0,0,0,0.12);
 
-  --transition: 180ms ease;
+  --transition: 170ms ease;
+  --transition-slow: 300ms cubic-bezier(0.32,0.72,0,1);
 
-  --header-height:  56px;
-  --tab-bar-height: 62px;
+  --header-height:  58px;
+  --tab-bar-height: 80px; /* floating pill + gap */
   --timer-height:   0px;
+
+  /* Category accent colors (for recipe cards) */
+  --cat-1: #E5622A;
+  --cat-2: #4A7C59;
+  --cat-3: #4A72A0;
+  --cat-4: #8A5AA0;
+  --cat-5: #C4922A;
+  --cat-6: #5A3A2A;
 }
 
-/* ── Ocean palette ── */
+/* ── Ocean ── */
 html[data-palette="ocean"] {
-  --color-primary:       #0F3D52;
-  --color-primary-light: #1A6B8A;
-  --color-primary-dark:  #082838;
-  --color-accent:        #1A8C75;
-  --color-accent-light:  #22A98E;
-  --color-surface:       #F2F8FA;
-  --color-surface-alt:   #E2EFF4;
+  --color-primary:       #0B3048;
+  --color-primary-light: #1A5878;
+  --color-primary-dark:  #061828;
+  --color-accent:        #1A9E80;
+  --color-accent-light:  #22B896;
+  --color-surface:       #F0F6F8;
+  --color-surface-alt:   #DFF0F5;
   --color-card:          #FFFFFF;
-  --color-border:        #C4DDE8;
-  --color-text:          #0A2535;
-  --color-text-muted:    #4A7A8A;
+  --color-border:        #C0DCEA;
+  --color-text:          #081E2A;
+  --color-text-muted:    #3A6A7A;
+  --tab-overlay: rgba(11,48,72,0.95);
 }
 
-/* ── Sunset palette ── */
+/* ── Sunset ── */
 html[data-palette="sunset"] {
-  --color-primary:       #8B2500;
-  --color-primary-light: #B83A00;
-  --color-primary-dark:  #5C1800;
-  --color-accent:        #C47A1A;
-  --color-accent-light:  #D4922A;
+  --color-primary:       #7A1E00;
+  --color-primary-light: #A83000;
+  --color-primary-dark:  #4A1000;
+  --color-accent:        #C07818;
+  --color-accent-light:  #D49030;
   --color-surface:       #FEF8F2;
-  --color-surface-alt:   #FCF0E0;
+  --color-surface-alt:   #FAEEDD;
   --color-card:          #FFFFFF;
-  --color-border:        #ECDBC4;
-  --color-text:          #2A0E00;
-  --color-text-muted:    #7A5030;
+  --color-border:        #ECD8B8;
+  --color-text:          #280800;
+  --color-text-muted:    #724A28;
+  --tab-overlay: rgba(122,30,0,0.95);
 }
 
-/* ── Lavender palette ── */
+/* ── Violet ── */
 html[data-palette="lavender"] {
-  --color-primary:       #4A2272;
-  --color-primary-light: #6B3A9A;
-  --color-primary-dark:  #31145A;
-  --color-accent:        #2468A0;
-  --color-accent-light:  #3080C0;
+  --color-primary:       #3A1858;
+  --color-primary-light: #5A2A80;
+  --color-primary-dark:  #220A40;
+  --color-accent:        #C05898;
+  --color-accent-light:  #D870B0;
   --color-surface:       #F6F2FC;
-  --color-surface-alt:   #ECE5F6;
+  --color-surface-alt:   #EDE5F8;
   --color-card:          #FFFFFF;
-  --color-border:        #D4C6EA;
-  --color-text:          #18062A;
-  --color-text-muted:    #6A4A80;
+  --color-border:        #D0C0E8;
+  --color-text:          #180630;
+  --color-text-muted:    #604880;
+  --tab-overlay: rgba(58,24,88,0.95);
 }
 
-/* ── Forest palette ── */
+/* ── Forest ── */
 html[data-palette="forest"] {
-  --color-primary:       #16502E;
-  --color-primary-light: #1E7A45;
-  --color-primary-dark:  #0C3820;
-  --color-accent:        #7A5828;
-  --color-accent-light:  #9A7038;
-  --color-surface:       #F2F7F4;
-  --color-surface-alt:   #DDEEE4;
+  --color-primary:       #102A18;
+  --color-primary-light: #1C4828;
+  --color-primary-dark:  #060E0A;
+  --color-accent:        #7A6028;
+  --color-accent-light:  #9A7838;
+  --color-surface:       #F2F6F2;
+  --color-surface-alt:   #DAEADA;
   --color-card:          #FFFFFF;
-  --color-border:        #AACEBA;
-  --color-text:          #081A10;
-  --color-text-muted:    #4A7458;
+  --color-border:        #AACAAA;
+  --color-text:          #060E0A;
+  --color-text-muted:    #3A5A40;
+  --tab-overlay: rgba(16,42,24,0.95);
 }
 
-/* ── Rose palette (original) ── */
+/* ── Rose ── */
 html[data-palette="rose"] {
-  --color-primary:       #A02A22;
-  --color-primary-light: #C4362C;
-  --color-primary-dark:  #7A1E18;
-  --color-accent:        #C47820;
-  --color-accent-light:  #D89030;
-  --color-surface:       #FDF6F0;
+  --color-primary:       #8A1A14;
+  --color-primary-light: #B02820;
+  --color-primary-dark:  #600E0A;
+  --color-accent:        #C0781A;
+  --color-accent-light:  #D49030;
+  --color-surface:       #FDF5F0;
   --color-surface-alt:   #F8E8DC;
   --color-card:          #FFFFFF;
-  --color-border:        #E8D0C0;
-  --color-text:          #2A1208;
-  --color-text-muted:    #7A5040;
+  --color-border:        #EACABA;
+  --color-text:          #280808;
+  --color-text-muted:    #704838;
+  --tab-overlay: rgba(138,26,20,0.95);
 }

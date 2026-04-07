@@ -43,8 +43,24 @@
   top: 14px;
   right: 14px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
+
+.rdp-hero-action-btn {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background var(--transition);
+}
+.rdp-hero-action-btn:hover { background: rgba(255,255,255,0.24); }
+.rdp-hero-action-delete { padding: 5px 10px; }
 
 .rdp-hero-content {
   padding-top: 60px;

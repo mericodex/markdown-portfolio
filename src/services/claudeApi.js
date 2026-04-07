@@ -19,10 +19,8 @@ async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
     'Content-Type': 'application/json',
     'x-api-key': key,
     'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-allow-browser': 'true',
   };
-  if (!import.meta.env.DEV) {
-    headers['anthropic-dangerous-allow-browser'] = 'true';
-  }
 
   let res;
   try {

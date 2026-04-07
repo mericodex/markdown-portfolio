@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import RecipeCard from '../recipes/RecipeCard';
 import RecipeDetailPage from '../recipes/RecipeDetailPage';
+import AddRecipeModal from '../../components/AddRecipeModal';
 import TagPill from '../../components/TagPill';
 import Toast from '../../components/Toast';
 import ShareButton from '../../components/ShareButton';
@@ -30,6 +31,7 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
   const [toast, setToast]     = useState(null);
   const [loadingCover, setLoadingCover] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
 
   const recipes = useMemo(() => {
     let list = cbState.recipes.filter(r => r.cookbookId === cookbook.id);
@@ -97,6 +99,7 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
         onBack={() => setSelectedRecipe(null)}
         settings={settings}
         showSaveButton={false}
+        allowEdit={true}
       />
     );
   }
@@ -111,6 +114,12 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
         />
       )}
 
+      <AddRecipeModal
+        isOpen={showAddRecipe}
+        onClose={() => setShowAddRecipe(false)}
+        defaultCookbookId={cookbook.id}
+      />
+
       {/* Header */}
       <div className="cookbook-detail-header" style={{ background: cookbook.color ?? 'var(--color-primary)' }}>
         <button className="btn btn-sm" style={{color:'#fff',background:'rgba(255,255,255,0.2)'}} onClick={onBack}>
@@ -124,6 +133,9 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
           </div>
         </div>
         <div className="cookbook-detail-actions">
+          <button className="btn btn-sm" style={{color:'#fff',background:'rgba(255,255,255,0.2)'}} onClick={() => setShowAddRecipe(true)}>
+            ✏️ Add Recipe
+          </button>
           <button
             className="btn btn-sm"
             style={{color:'#fff',background:'rgba(255,255,255,0.2)'}}
@@ -133,7 +145,7 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
             {loadingCover ? <span className="spinner" style={{width:14,height:14}} /> : '✨'} AI Cover
           </button>
           <button className="btn btn-sm" style={{color:'#fff',background:'rgba(255,255,255,0.2)'}} onClick={handlePrint}>
-            🖨 Print All
+            🖨 Print
           </button>
           <ShareButton
             title={cookbook.name}
