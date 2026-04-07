@@ -2,26 +2,13 @@ import { useState } from 'react';
 import { adjustRecipe } from '../../services/claudeApi';
 import './adjustment.css';
 
-const QUICK_QUESTIONS = [
-  'Make it dairy-free',
-  'Reduce calories',
-  'Make it gluten-free',
-  'Make it diabetic friendly',
-  'Make it vegan',
-  'Reduce cooking time',
-  'Make it higher protein',
-  'Suggest ingredient substitutions',
-  'Increase fibre content',
-  'Make it nut-free',
-];
-
 export default function AdjustmentTab({ apiKey }) {
-  const [recipe, setRecipe]   = useState('');
+  const [recipe, setRecipe]     = useState('');
   const [question, setQuestion] = useState('');
-  const [photo, setPhoto]     = useState(null);    // { base64, url, mimeType }
+  const [photo, setPhoto]       = useState(null);
   const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState(null);
 
   async function handleAsk() {
     if (!recipe.trim() && !photo) return;
@@ -29,12 +16,7 @@ export default function AdjustmentTab({ apiKey }) {
     setResponse('');
     setError(null);
     try {
-      const result = await adjustRecipe({
-        apiKey,
-        recipe,
-        question,
-        photoBase64: photo?.base64
-      });
+      const result = await adjustRecipe({ apiKey, recipe, question, photoBase64: photo?.base64 });
       setResponse(result);
     } catch (e) {
       setError(e.message ?? 'Something went wrong. Please try again.');
@@ -49,16 +31,10 @@ export default function AdjustmentTab({ apiKey }) {
     const reader = new FileReader();
     reader.onload = ev => {
       const dataUrl = ev.target.result;
-      setPhoto({
-        base64: dataUrl.split(',')[1],
-        url: dataUrl,
-        mimeType: file.type || 'image/jpeg'
-      });
+      setPhoto({ base64: dataUrl.split(',')[1], url: dataUrl, mimeType: file.type || 'image/jpeg' });
     };
     reader.readAsDataURL(file);
   }
-
-  function clearPhoto() { setPhoto(null); }
 
   const canSubmit = (recipe.trim() || photo) && !loading;
 
@@ -67,7 +43,7 @@ export default function AdjustmentTab({ apiKey }) {
       <div className="adjustment-input-area">
         <textarea
           className="input"
-          rows={4}
+          rows={5}
           placeholder="Paste or type a recipe here…"
           value={recipe}
           onChange={e => setRecipe(e.target.value)}
@@ -89,30 +65,19 @@ export default function AdjustmentTab({ apiKey }) {
           ) : (
             <>
               <img src={photo.url} alt="Recipe" className="adjustment-photo-preview" />
-              <button className="btn btn-secondary btn-sm" onClick={clearPhoto}>✕ Remove Photo</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => setPhoto(null)}>✕ Remove Photo</button>
             </>
           )}
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-            or take a photo of a recipe book/card
+            or take a photo of a recipe book / card
           </span>
         </div>
 
-        {/* Quick question chips */}
-        <div className="adjustment-chips">
-          {QUICK_QUESTIONS.map(q => (
-            <button
-              key={q}
-              className="adjustment-chip"
-              onClick={() => setQuestion(q)}
-            >{q}</button>
-          ))}
-        </div>
-
-        {/* Question input + submit */}
+        {/* Question + submit */}
         <div className="adjustment-question">
           <input
             className="input"
-            placeholder="Ask a specific question…"
+            placeholder="Ask a question about the recipe…"
             value={question}
             onChange={e => setQuestion(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && canSubmit && handleAsk()}
@@ -137,7 +102,7 @@ export default function AdjustmentTab({ apiKey }) {
         {!loading && !response && !error && (
           <div className="empty-state">
             <div className="empty-icon">✏️</div>
-            <p>Paste a recipe above and ask a question like "make it dairy-free" or "is this breastfeeding safe?"</p>
+            <p>Paste a recipe or ask a question — for example: "make it gluten-free", "reduce the calories", or "suggest substitutions for the sauce".</p>
           </div>
         )}
 

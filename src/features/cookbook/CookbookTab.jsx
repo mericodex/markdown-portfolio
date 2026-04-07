@@ -3,6 +3,7 @@ import Modal from '../../components/Modal';
 import ImportModal from './ImportModal';
 import CookbookDetail from './CookbookDetail';
 import Toast from '../../components/Toast';
+import AddRecipeModal from '../../components/AddRecipeModal';
 import useAppContext from '../../hooks/useAppContext';
 import './cookbook.css';
 
@@ -14,10 +15,11 @@ const PRESET_COLORS = [
 
 export default function CookbookTab({ apiKey, settings }) {
   const { cookbook, cookbookDispatch } = useAppContext();
-  const [activeBook, setActiveBook] = useState(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [showImport, setShowImport] = useState(false);
-  const [toast, setToast]           = useState(null);
+  const [activeBook, setActiveBook]     = useState(null);
+  const [showCreate, setShowCreate]     = useState(false);
+  const [showImport, setShowImport]     = useState(false);
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [toast, setToast]               = useState(null);
   const [editingBook, setEditingBook] = useState(null);
 
   // Create / edit form state
@@ -80,8 +82,11 @@ export default function CookbookTab({ apiKey, settings }) {
           <button className="btn btn-secondary btn-sm" onClick={() => setShowImport(true)}>
             📥 Import
           </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => setShowAddRecipe(true)}>
+            ✏️ Add Recipe
+          </button>
           <button className="btn btn-primary btn-sm" onClick={openCreate}>
-            + New
+            + New Cookbook
           </button>
         </div>
       </div>
@@ -170,6 +175,13 @@ export default function CookbookTab({ apiKey, settings }) {
         onClose={() => setShowImport(false)}
         onImport={handleImport}
         apiKey={apiKey}
+      />
+
+      {/* Add recipe manually */}
+      <AddRecipeModal
+        isOpen={showAddRecipe}
+        onClose={() => setShowAddRecipe(false)}
+        defaultCookbookId={cookbook.cookbooks[0]?.id}
       />
     </div>
   );

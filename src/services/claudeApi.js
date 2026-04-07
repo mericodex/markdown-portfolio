@@ -2,24 +2,39 @@ const API_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL   = 'claude-opus-4-6';
 
 async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
+  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+    throw new Error('Invalid API key. Go to Settings and check your Anthropic API key.');
+  }
+
   const messages = Array.isArray(userContent)
     ? [{ role: 'user', content: userContent }]
     : [{ role: 'user', content: userContent }];
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true'
-    },
-    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system: systemPrompt, messages })
-  });
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system: systemPrompt, messages })
+    });
+  } catch (networkErr) {
+    throw new Error(
+      'Could not reach the Anthropic API. Check your internet connection, and make sure no firewall or antivirus is blocking requests to api.anthropic.com.'
+    );
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message ?? `API error ${res.status}`);
+    const msg = err?.error?.message ?? '';
+    if (res.status === 401) throw new Error('API key rejected. Go to Settings and enter a valid Anthropic API key.');
+    if (res.status === 429) throw new Error('Rate limit hit. Wait a moment and try again.');
+    if (res.status === 400) throw new Error(`Bad request: ${msg}`);
+    throw new Error(msg || `API error ${res.status}`);
   }
 
   const data = await res.json();

@@ -3,6 +3,7 @@ import AddItemModal from './AddItemModal';
 import Toast from '../../components/Toast';
 import TagPill from '../../components/TagPill';
 import ShareButton from '../../components/ShareButton';
+import AddRecipeModal from '../../components/AddRecipeModal';
 import { formatExpiry, formatCurrency } from '../../utils/formatters';
 import { PANTRY_CATEGORIES } from '../../context/reducers/pantryReducer';
 import useAppContext from '../../hooks/useAppContext';
@@ -22,7 +23,8 @@ function getPantryShareText(items) {
 
 export default function PantryTab({ apiKey, settings }) {
   const { pantry, pantryDispatch } = useAppContext();
-  const [showAdd, setShowAdd]     = useState(false);
+  const [showAdd, setShowAdd]         = useState(false);
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [editItem, setEditItem]   = useState(null);
   const [catFilter, setCatFilter] = useState('All');
   const [sortBy, setSortBy]       = useState('Default');
@@ -144,8 +146,19 @@ export default function PantryTab({ apiKey, settings }) {
         })}
       </div>
 
-      {/* FAB */}
-      <button className="pantry-fab" onClick={() => setShowAdd(true)} aria-label="Add pantry item">+</button>
+      {/* FABs */}
+      <button
+        className="pantry-fab"
+        onClick={() => setShowAdd(true)}
+        aria-label="Add pantry item"
+        title="Add pantry item"
+      >+</button>
+      <button
+        className="pantry-fab pantry-fab-recipe"
+        onClick={() => setShowAddRecipe(true)}
+        aria-label="Add recipe"
+        title="Add new recipe"
+      >✏️</button>
 
       {/* key forces remount when switching between add/edit so fields populate correctly */}
       <AddItemModal
@@ -156,6 +169,11 @@ export default function PantryTab({ apiKey, settings }) {
         editItem={editItem}
         apiKey={apiKey}
         settings={settings}
+      />
+
+      <AddRecipeModal
+        isOpen={showAddRecipe}
+        onClose={() => setShowAddRecipe(false)}
       />
     </div>
   );

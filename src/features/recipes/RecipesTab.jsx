@@ -3,28 +3,21 @@ import { generateRecipes } from '../../services/claudeApi';
 import { normaliseRecipe } from '../../utils/recipeParser';
 import RecipeCard from './RecipeCard';
 import ShareButton from '../../components/ShareButton';
+import AddRecipeModal from '../../components/AddRecipeModal';
 import useAppContext from '../../hooks/useAppContext';
 import './recipes.css';
 
 const CATEGORIES = ['All', 'Main Dish', 'Dessert', 'Starter', 'Quick Meal', 'Breakfast', 'Salad', 'Soup', 'Snack', 'Baking'];
 
-const DIETARY_OPTIONS = [
-  'Gluten Free',
-  'Dairy Free',
-  'Diabetic Friendly',
-  'Breastfeeding Safe',
-  'Vegan',
-  'Vegetarian',
-  'Low Carb',
-  'High Protein',
-  'Nut Free',
-  'Low Sodium',
+const PRESET_DIETARY = [
+  'Gluten Free', 'Dairy Free', 'Diabetic Friendly', 'Breastfeeding Safe',
+  'Vegan', 'Vegetarian', 'Low Carb', 'High Protein', 'Nut Free', 'Low Sodium',
 ];
 
 function getShareText(recipes) {
   if (!recipes.length) return '';
   return recipes.map(r => {
-    const ings = r.ingredients?.map(i => `  - ${i.quantity} ${i.unit} ${i.name}`).join('\n') ?? '';
+    const ings  = r.ingredients?.map(i => `  - ${i.quantity} ${i.unit} ${i.name}`).join('\n') ?? '';
     const steps = r.steps?.map((s, i) => `  ${i + 1}. ${s}`).join('\n') ?? '';
     return `${r.title}\nPrep: ${r.prepTime}min | Cook: ${r.cookTime}min | Serves: ${r.servings}\n\nIngredients:\n${ings}\n\nMethod:\n${steps}`;
   }).join('\n\n---\n\n');
@@ -32,16 +25,22 @@ function getShareText(recipes) {
 
 export default function RecipesTab({ apiKey, settings }) {
   const { pantry } = useAppContext();
-  const [mode, setMode]           = useState('craving');
-  const [craving, setCraving]     = useState('');
-  const [category, setCategory]   = useState('All');
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [useAllPantry, setUseAllPantry]   = useState(true);
+
+  const [mode, setMode]             = useState('craving');
+  const [craving, setCraving]       = useState('');
+  const [category, setCategory]     = useState('All');
+  const [selectedItems, setSelectedItems]   = useState(new Set());
+  const [useAllPantry, setUseAllPantry]     = useState(true);
+
+  // Dietary filters — preset + custom
   const [dietaryFilters, setDietaryFilters] = useState([]);
   const [showDietary, setShowDietary]       = useState(false);
-  const [recipes, setRecipes]     = useState([]);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState(null);
+  const [customFilter, setCustomFilter]     = useState('');
+
+  const [recipes, setRecipes]   = useState([]);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState(null);
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
 
   const pantryItems = pantry.items;
 
@@ -57,6 +56,17 @@ export default function RecipesTab({ apiKey, settings }) {
     setDietaryFilters(prev =>
       prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt]
     );
+  }
+
+  function addCustomFilter() {
+    const val = customFilter.trim();
+    if (!val || dietaryFilters.includes(val)) { setCustomFilter(''); return; }
+    setDietaryFilters(prev => [...prev, val]);
+    setCustomFilter('');
+  }
+
+  function removeFilter(opt) {
+    setDietaryFilters(prev => prev.filter(x => x !== opt));
   }
 
   async function handleGenerate() {
@@ -82,7 +92,6 @@ export default function RecipesTab({ apiKey, settings }) {
 
   return (
     <div className="recipes-tab">
-      {/* Controls */}
       <div className="recipes-controls">
         {/* Mode selector */}
         <div className="recipes-mode-tabs">
@@ -95,9 +104,7 @@ export default function RecipesTab({ apiKey, settings }) {
               key={m.id}
               className={`mode-tab-btn${mode === m.id ? ' active' : ''}`}
               onClick={() => setMode(m.id)}
-            >
-              {m.label}
-            </button>
+            >{m.label}</button>
           ))}
         </div>
 
@@ -117,28 +124,18 @@ export default function RecipesTab({ apiKey, settings }) {
         {/* Pantry selector */}
         {mode === 'pantry' && (
           <div>
-            <label className="pantry-checkbox-item" style={{paddingLeft:0, marginBottom:4}}>
-              <input
-                type="checkbox"
-                checked={useAllPantry}
-                onChange={e => setUseAllPantry(e.target.checked)}
-              />
+            <label className="pantry-checkbox-item" style={{ paddingLeft: 0, marginBottom: 4 }}>
+              <input type="checkbox" checked={useAllPantry} onChange={e => setUseAllPantry(e.target.checked)} />
               <span>Use all pantry items ({pantryItems.length})</span>
             </label>
             {!useAllPantry && (
               <div className="pantry-checkboxes">
                 {pantryItems.length === 0 && (
-                  <p style={{fontSize:'var(--font-size-sm)',color:'var(--color-text-muted)'}}>
-                    Add items to your pantry first.
-                  </p>
+                  <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>Add items to your pantry first.</p>
                 )}
                 {pantryItems.map(item => (
                   <label key={item.id} className="pantry-checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.has(item.id)}
-                      onChange={() => toggleItem(item.id)}
-                    />
+                    <input type="checkbox" checked={selectedItems.has(item.id)} onChange={() => toggleItem(item.id)} />
                     <span>{item.name} — {item.quantity} {item.unit}</span>
                   </label>
                 ))}
@@ -153,19 +150,46 @@ export default function RecipesTab({ apiKey, settings }) {
             className={`btn btn-sm ${showDietary ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowDietary(s => !s)}
           >
-            🥗 Dietary Filters {dietaryFilters.length > 0 ? `(${dietaryFilters.length})` : ''}
+            🥗 Dietary Filters {dietaryFilters.length > 0 ? `(${dietaryFilters.length} active)` : ''}
           </button>
+
           {showDietary && (
-            <div className="dietary-options">
-              {DIETARY_OPTIONS.map(opt => (
-                <label key={opt} className="pantry-checkbox-item">
-                  <input
-                    type="checkbox"
-                    checked={dietaryFilters.includes(opt)}
-                    onChange={() => toggleDietary(opt)}
-                  />
-                  <span>{opt}</span>
-                </label>
+            <div className="dietary-panel">
+              {/* Preset checkboxes */}
+              <div className="dietary-options">
+                {PRESET_DIETARY.map(opt => (
+                  <label key={opt} className="pantry-checkbox-item">
+                    <input type="checkbox" checked={dietaryFilters.includes(opt)} onChange={() => toggleDietary(opt)} />
+                    <span>{opt}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Custom filter input */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <input
+                  className="input"
+                  placeholder="Add your own filter… e.g. Low FODMAP"
+                  value={customFilter}
+                  onChange={e => setCustomFilter(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addCustomFilter()}
+                  style={{ flex: 1 }}
+                />
+                <button className="btn btn-secondary btn-sm" onClick={addCustomFilter} disabled={!customFilter.trim()}>
+                  + Add
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Active filter tags */}
+          {dietaryFilters.length > 0 && (
+            <div className="active-filters">
+              {dietaryFilters.map(f => (
+                <span key={f} className="active-filter-tag">
+                  {f}
+                  <button onClick={() => removeFilter(f)}>×</button>
+                </span>
               ))}
             </div>
           )}
@@ -173,19 +197,10 @@ export default function RecipesTab({ apiKey, settings }) {
 
         {/* Category + generate */}
         <div className="category-row">
-          <select
-            className="select"
-            style={{flex:1}}
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-          >
+          <select className="select" style={{ flex: 1 }} value={category} onChange={e => setCategory(e.target.value)}>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <button
-            className="btn btn-primary"
-            onClick={handleGenerate}
-            disabled={loading || !canGenerate}
-          >
+          <button className="btn btn-primary" onClick={handleGenerate} disabled={loading || !canGenerate}>
             {loading ? <span className="spinner" /> : '✨ Generate'}
           </button>
         </div>
@@ -197,7 +212,7 @@ export default function RecipesTab({ apiKey, settings }) {
 
         {loading && (
           <div className="recipes-loading">
-            <div className="spinner" style={{width:40,height:40}} />
+            <div className="spinner" style={{ width: 40, height: 40 }} />
             <p>Cooking up recipe ideas just for you…</p>
           </div>
         )}
@@ -205,12 +220,18 @@ export default function RecipesTab({ apiKey, settings }) {
         {!loading && recipes.length === 0 && !error && (
           <div className="empty-state">
             <div className="empty-icon">🍳</div>
-            <p>Choose a mode above and tap <strong>Generate</strong> to get 4 personalised recipes.</p>
+            <p>Choose a mode above and tap <strong>Generate</strong> to get 4 recipes.</p>
+            <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={() => setShowAddRecipe(true)}>
+              ✏️ Add a recipe manually
+            </button>
           </div>
         )}
 
         {recipes.length > 0 && (
-          <div style={{display:'flex', justifyContent:'flex-end', marginBottom:8}}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <button className="btn btn-secondary btn-sm" onClick={() => setShowAddRecipe(true)}>
+              ✏️ Add Recipe
+            </button>
             <ShareButton title="My Recipes" getText={() => getShareText(recipes)} />
           </div>
         )}
@@ -219,6 +240,8 @@ export default function RecipesTab({ apiKey, settings }) {
           <RecipeCard key={recipe.id} recipe={recipe} settings={settings} index={i} />
         ))}
       </div>
+
+      <AddRecipeModal isOpen={showAddRecipe} onClose={() => setShowAddRecipe(false)} />
     </div>
   );
 }
