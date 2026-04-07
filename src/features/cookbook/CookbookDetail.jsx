@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import RecipeCard from '../recipes/RecipeCard';
+import RecipeDetailPage from '../recipes/RecipeDetailPage';
 import TagPill from '../../components/TagPill';
 import Toast from '../../components/Toast';
 import ShareButton from '../../components/ShareButton';
@@ -28,6 +29,7 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
   const [fontSize, setFontSize] = useState(settings?.recipeFontSize ?? 'M');
   const [toast, setToast]     = useState(null);
   const [loadingCover, setLoadingCover] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   const recipes = useMemo(() => {
     let list = cbState.recipes.filter(r => r.cookbookId === cookbook.id);
@@ -87,6 +89,17 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
   }
 
   const fontPx = FONT_SIZES[fontSize] ?? '16px';
+
+  if (selectedRecipe) {
+    return (
+      <RecipeDetailPage
+        recipe={selectedRecipe}
+        onBack={() => setSelectedRecipe(null)}
+        settings={settings}
+        showSaveButton={false}
+      />
+    );
+  }
 
   return (
     <div className="cookbook-detail" style={{ fontSize: fontPx }}>
@@ -189,7 +202,7 @@ export default function CookbookDetail({ cookbook, onBack, apiKey, settings }) {
         )}
         {recipes.map((recipe, i) => (
           <div key={recipe.id} className="cookbook-recipe-item">
-            <RecipeCard recipe={recipe} settings={settings} index={i} showSaveButton={false} />
+            <RecipeCard recipe={recipe} settings={settings} index={i} showSaveButton={false} onOpenDetail={setSelectedRecipe} />
             <div className="cookbook-recipe-controls">
               <button className="btn btn-secondary btn-sm" onClick={() => handleAddToShopping(recipe)}>
                 🛒 Add to Shopping

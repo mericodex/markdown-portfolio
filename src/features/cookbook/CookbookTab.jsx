@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import Modal from '../../components/Modal';
 import ImportModal from './ImportModal';
 import CookbookDetail from './CookbookDetail';
@@ -8,10 +8,12 @@ import useAppContext from '../../hooks/useAppContext';
 import './cookbook.css';
 
 const PRESET_COLORS = [
-  '#c0392b','#1a6b8a','#d35400','#7d3c98',
-  '#1e6b3c','#c07a2b','#2980b9','#e74c3c',
-  '#16a085','#8e44ad'
+  '#2C2C2E','#4A1A0A','#5C2A00','#1A2840',
+  '#1A4A2A','#4A2A5A','#1A3A5A','#5A1A2A',
+  '#3A3020','#1A3A3A'
 ];
+
+const SORT_OPTIONS = ['Default', 'A–Z', 'Manual'];
 
 export default function CookbookTab({ apiKey, settings }) {
   const { cookbook, cookbookDispatch } = useAppContext();
@@ -20,10 +22,19 @@ export default function CookbookTab({ apiKey, settings }) {
   const [showImport, setShowImport]     = useState(false);
   const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [toast, setToast]               = useState(null);
-  const [editingBook, setEditingBook] = useState(null);
+  const [editingBook, setEditingBook]   = useState(null);
+  const [sortMode, setSortMode]         = useState('Default');
 
-  // Create / edit form state
-  const [form, setForm] = useState({ name: '', color: PRESET_COLORS[0], emoji: '📖', targetBook: 'default' });
+  // Drag-and-drop state
+  const dragId    = useRef(null);
+  const dragOver  = useRef(null);
+
+  const [form, setForm] = useState({ name: '', color: PRESET_COLORS[0], emoji: '📖' });
+
+  const sortedBooks = useMemo(() => {
+    if (sortMode === 'A–Z') return [...cookbook.cookbooks].sort((a, b) => a.name.localeCompare(b.name));
+    return cookbook.cookbooks; // Default and Manual both use current array order
+  }, [cookbook.cookbooks, sortMode]);
 
   function openCreate() {
     setForm({ name: '', color: PRESET_COLORS[0], emoji: '📖' });
@@ -60,6 +71,33 @@ export default function CookbookTab({ apiKey, settings }) {
     setToast({ message: `"${recipe.title}" imported!` });
   }
 
+  // ── Drag-and-drop handlers (Manual mode only) ──────────────────────────
+  function handleDragStart(e, id) {
+    dragId.current = id;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleDragOver(e, id) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    dragOver.current = id;
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    if (!dragId.current || dragId.current === dragOver.current) return;
+    const ids = cookbook.cookbooks.map(cb => cb.id);
+    const fromIdx = ids.indexOf(dragId.current);
+    const toIdx   = ids.indexOf(dragOver.current);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const reordered = [...ids];
+    reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, dragId.current);
+    cookbookDispatch({ type: 'REORDER_COOKBOOKS', ids: reordered });
+    dragId.current   = null;
+    dragOver.current = null;
+  }
+
   if (activeBook) {
     return (
       <CookbookDetail
@@ -79,38 +117,60 @@ export default function CookbookTab({ apiKey, settings }) {
       <div className="cookbook-toolbar">
         <span className="cookbook-toolbar-title">My Cookbooks</span>
         <div className="cookbook-toolbar-actions">
-          <button className="btn btn-secondary btn-sm" onClick={() => setShowImport(true)}>
-            📥 Import
-          </button>
-          <button className="btn btn-secondary btn-sm" onClick={() => setShowAddRecipe(true)}>
-            ✏️ Add Recipe
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={openCreate}>
-            + New Cookbook
-          </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => setShowImport(true)}>📥 Import</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => setShowAddRecipe(true)}>✏️ Add Recipe</button>
+          <button className="btn btn-primary btn-sm" onClick={openCreate}>+ New</button>
         </div>
+      </div>
+
+      {/* Sort toggle */}
+      <div className="cookbook-sort-bar">
+        <span className="cookbook-sort-label">Order by</span>
+        <div className="toggle-switch">
+          {SORT_OPTIONS.map(opt => (
+            <button
+              key={opt}
+              className={`toggle-option${sortMode === opt ? ' active' : ''}`}
+              onClick={() => setSortMode(opt)}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+        {sortMode === 'Manual' && (
+          <span className="cookbook-sort-hint">Drag cards to reorder</span>
+        )}
       </div>
 
       {/* Cookbooks grid */}
       <div className="cookbooks-grid">
-        {cookbook.cookbooks.map(book => {
+        {sortedBooks.map(book => {
           const count = cookbook.recipes.filter(r => r.cookbookId === book.id).length;
+          const isDraggable = sortMode === 'Manual';
           return (
-            <div key={book.id} className="cookbook-card" onClick={() => setActiveBook(book)}>
+            <div
+              key={book.id}
+              className={`cookbook-card${isDraggable ? ' cookbook-card-draggable' : ''}`}
+              onClick={() => !isDraggable && setActiveBook(book)}
+              draggable={isDraggable}
+              onDragStart={isDraggable ? e => handleDragStart(e, book.id) : undefined}
+              onDragOver={isDraggable ? e => handleDragOver(e, book.id) : undefined}
+              onDrop={isDraggable ? handleDrop : undefined}
+            >
               <div className="cookbook-card-cover" style={{ background: book.color }}>
                 <span className="cookbook-cover-emoji">{book.emoji ?? '📖'}</span>
                 {book.tagline && <span className="cookbook-cover-tagline">{book.tagline}</span>}
+                {isDraggable && <span className="cookbook-drag-handle">⠿</span>}
               </div>
               <div className="cookbook-card-footer">
                 <div className="cookbook-card-name">{book.name}</div>
                 <div className="cookbook-card-count">{count} recipe{count !== 1 ? 's' : ''}</div>
                 <div className="cookbook-card-menu">
-                  <button className="btn btn-secondary btn-sm" style={{flex:1}} onClick={e => openEdit(book, e)}>
-                    ✏️
-                  </button>
-                  <button className="btn btn-danger btn-sm" style={{flex:1}} onClick={e => handleDeleteBook(book, e)}>
-                    🗑
-                  </button>
+                  <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={e => openEdit(book, e)}>✏️</button>
+                  <button className="btn btn-danger btn-sm" style={{ flex: 1 }} onClick={e => handleDeleteBook(book, e)}>🗑</button>
+                  {!isDraggable && (
+                    <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={e => { e.stopPropagation(); setActiveBook(book); }}>→</button>
+                  )}
                 </div>
               </div>
             </div>
@@ -118,7 +178,7 @@ export default function CookbookTab({ apiKey, settings }) {
         })}
 
         {cookbook.cookbooks.length === 0 && (
-          <div className="empty-state" style={{gridColumn:'1/-1'}}>
+          <div className="empty-state" style={{ gridColumn: '1/-1' }}>
             <div className="empty-icon">📚</div>
             <p>No cookbooks yet. Create one to start saving recipes!</p>
           </div>
@@ -126,18 +186,14 @@ export default function CookbookTab({ apiKey, settings }) {
       </div>
 
       {/* Create / Edit modal */}
-      <Modal
-        isOpen={showCreate}
-        onClose={() => setShowCreate(false)}
-        title={editingBook ? 'Edit Cookbook' : 'New Cookbook'}
-      >
+      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title={editingBook ? 'Edit Cookbook' : 'New Cookbook'}>
         <div className="form-group">
           <label className="label">Name</label>
           <input
             className="input"
             placeholder="e.g. Weeknight Dinners"
             value={form.name}
-            onChange={e => setForm(f => ({...f, name: e.target.value}))}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
             autoFocus
           />
         </div>
@@ -147,8 +203,8 @@ export default function CookbookTab({ apiKey, settings }) {
             className="input"
             maxLength={2}
             value={form.emoji}
-            onChange={e => setForm(f => ({...f, emoji: e.target.value}))}
-            style={{width:60}}
+            onChange={e => setForm(f => ({ ...f, emoji: e.target.value }))}
+            style={{ width: 60 }}
           />
         </div>
         <div className="form-group">
@@ -159,7 +215,7 @@ export default function CookbookTab({ apiKey, settings }) {
                 key={c}
                 className={`color-swatch${form.color === c ? ' selected' : ''}`}
                 style={{ background: c }}
-                onClick={() => setForm(f => ({...f, color: c}))}
+                onClick={() => setForm(f => ({ ...f, color: c }))}
               />
             ))}
           </div>
@@ -169,20 +225,9 @@ export default function CookbookTab({ apiKey, settings }) {
         </button>
       </Modal>
 
-      {/* Import modal */}
-      <ImportModal
-        isOpen={showImport}
-        onClose={() => setShowImport(false)}
-        onImport={handleImport}
-        apiKey={apiKey}
-      />
+      <ImportModal isOpen={showImport} onClose={() => setShowImport(false)} onImport={handleImport} apiKey={apiKey} />
 
-      {/* Add recipe manually */}
-      <AddRecipeModal
-        isOpen={showAddRecipe}
-        onClose={() => setShowAddRecipe(false)}
-        defaultCookbookId={cookbook.cookbooks[0]?.id}
-      />
+      <AddRecipeModal isOpen={showAddRecipe} onClose={() => setShowAddRecipe(false)} defaultCookbookId={cookbook.cookbooks[0]?.id} />
     </div>
   );
 }

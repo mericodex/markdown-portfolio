@@ -1,104 +1,122 @@
 /* ── Mama's Kitchen – Design Tokens ─────────────────────────────────────── */
 
-/* ── Default palette: Rose (warm, nurturing) ── */
+/* ── Default palette: Atelier (warm ivory + gold + charcoal) ── */
 :root {
-  --color-primary:       #c0392b;
-  --color-primary-light: #e74c3c;
-  --color-primary-dark:  #96281b;
-  --color-accent:        #e67e22;
-  --color-accent-light:  #f39c12;
-  --color-surface:       #fdf6f0;
-  --color-surface-alt:   #faeae0;
-  --color-card:          #ffffff;
-  --color-border:        #e8d5c8;
-  --color-text:          #2c1810;
-  --color-text-muted:    #7a5c50;
-  --color-success:       #27ae60;
-  --color-warning:       #f39c12;
-  --color-danger:        #e74c3c;
-  --color-info:          #2980b9;
+  --color-primary:       #1A1A1A;
+  --color-primary-light: #333333;
+  --color-primary-dark:  #000000;
+  --color-accent:        #B8913A;
+  --color-accent-light:  #CDA85A;
+  --color-surface:       #FAFAF7;
+  --color-surface-alt:   #F2F0EA;
+  --color-card:          #FFFFFF;
+  --color-border:        #E6E3D9;
+  --color-text:          #1A1A1A;
+  --color-text-muted:    #787870;
+  --color-success:       #2D6A4F;
+  --color-warning:       #B8913A;
+  --color-danger:        #B5362B;
+  --color-info:          #1A4A72;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
   --font-size-xs:   0.75rem;
-  --font-size-sm:   0.875rem;
+  --font-size-sm:   0.8125rem;
   --font-size-base: 1rem;
   --font-size-lg:   1.125rem;
   --font-size-xl:   1.25rem;
   --font-size-2xl:  1.5rem;
   --font-size-3xl:  1.875rem;
 
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   16px;
+  --radius-sm:   3px;
+  --radius-md:   6px;
+  --radius-lg:   12px;
+  --radius-xl:   20px;
   --radius-full: 9999px;
 
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.12);
-  --shadow-lg:  0 8px 24px rgba(0,0,0,0.16);
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:  0 12px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
 
-  --transition: 200ms ease;
+  --transition: 180ms ease;
 
   --header-height:  56px;
-  --tab-bar-height: 64px;
-  --timer-height:   0px; /* updated dynamically via JS */
+  --tab-bar-height: 62px;
+  --timer-height:   0px;
 }
 
 /* ── Ocean palette ── */
 html[data-palette="ocean"] {
-  --color-primary:       #1a6b8a;
-  --color-primary-light: #2196b9;
-  --color-primary-dark:  #0e4d66;
-  --color-accent:        #17a589;
-  --color-accent-light:  #1abc9c;
-  --color-surface:       #f0f7fa;
-  --color-surface-alt:   #ddeef5;
-  --color-card:          #ffffff;
-  --color-border:        #b8d9e8;
-  --color-text:          #0d2b38;
-  --color-text-muted:    #4a7a8a;
+  --color-primary:       #0F3D52;
+  --color-primary-light: #1A6B8A;
+  --color-primary-dark:  #082838;
+  --color-accent:        #1A8C75;
+  --color-accent-light:  #22A98E;
+  --color-surface:       #F2F8FA;
+  --color-surface-alt:   #E2EFF4;
+  --color-card:          #FFFFFF;
+  --color-border:        #C4DDE8;
+  --color-text:          #0A2535;
+  --color-text-muted:    #4A7A8A;
 }
 
 /* ── Sunset palette ── */
 html[data-palette="sunset"] {
-  --color-primary:       #d35400;
-  --color-primary-light: #e67e22;
-  --color-primary-dark:  #a04000;
-  --color-accent:        #c0392b;
-  --color-accent-light:  #e74c3c;
-  --color-surface:       #fef9f0;
-  --color-surface-alt:   #fdebd0;
-  --color-card:          #ffffff;
-  --color-border:        #f0c88a;
-  --color-text:          #2c1a00;
-  --color-text-muted:    #7a5020;
+  --color-primary:       #8B2500;
+  --color-primary-light: #B83A00;
+  --color-primary-dark:  #5C1800;
+  --color-accent:        #C47A1A;
+  --color-accent-light:  #D4922A;
+  --color-surface:       #FEF8F2;
+  --color-surface-alt:   #FCF0E0;
+  --color-card:          #FFFFFF;
+  --color-border:        #ECDBC4;
+  --color-text:          #2A0E00;
+  --color-text-muted:    #7A5030;
 }
 
 /* ── Lavender palette ── */
 html[data-palette="lavender"] {
-  --color-primary:       #7d3c98;
-  --color-primary-light: #9b59b6;
-  --color-primary-dark:  #5b2c6f;
-  --color-accent:        #2980b9;
-  --color-accent-light:  #3498db;
-  --color-surface:       #f8f4fc;
-  --color-surface-alt:   #ede8f5;
-  --color-card:          #ffffff;
-  --color-border:        #d7c8e8;
-  --color-text:          #1a0a2e;
-  --color-text-muted:    #6a4a80;
+  --color-primary:       #4A2272;
+  --color-primary-light: #6B3A9A;
+  --color-primary-dark:  #31145A;
+  --color-accent:        #2468A0;
+  --color-accent-light:  #3080C0;
+  --color-surface:       #F6F2FC;
+  --color-surface-alt:   #ECE5F6;
+  --color-card:          #FFFFFF;
+  --color-border:        #D4C6EA;
+  --color-text:          #18062A;
+  --color-text-muted:    #6A4A80;
 }
 
 /* ── Forest palette ── */
 html[data-palette="forest"] {
-  --color-primary:       #1e6b3c;
-  --color-primary-light: #27ae60;
-  --color-primary-dark:  #145229;
-  --color-accent:        #8e6b3c;
-  --color-accent-light:  #b5853a;
-  --color-surface:       #f2f8f4;
-  --color-surface-alt:   #dbeee2;
-  --color-card:          #ffffff;
-  --color-border:        #b2d8bc;
-  --color-text:          #0a1f12;
-  --color-text-muted:    #4a7a58;
+  --color-primary:       #16502E;
+  --color-primary-light: #1E7A45;
+  --color-primary-dark:  #0C3820;
+  --color-accent:        #7A5828;
+  --color-accent-light:  #9A7038;
+  --color-surface:       #F2F7F4;
+  --color-surface-alt:   #DDEEE4;
+  --color-card:          #FFFFFF;
+  --color-border:        #AACEBA;
+  --color-text:          #081A10;
+  --color-text-muted:    #4A7458;
+}
+
+/* ── Rose palette (original) ── */
+html[data-palette="rose"] {
+  --color-primary:       #A02A22;
+  --color-primary-light: #C4362C;
+  --color-primary-dark:  #7A1E18;
+  --color-accent:        #C47820;
+  --color-accent-light:  #D89030;
+  --color-surface:       #FDF6F0;
+  --color-surface-alt:   #F8E8DC;
+  --color-card:          #FFFFFF;
+  --color-border:        #E8D0C0;
+  --color-text:          #2A1208;
+  --color-text-muted:    #7A5040;
 }

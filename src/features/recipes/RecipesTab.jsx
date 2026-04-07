@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { generateRecipes } from '../../services/claudeApi';
 import { normaliseRecipe } from '../../utils/recipeParser';
 import RecipeCard from './RecipeCard';
+import RecipeDetailPage from './RecipeDetailPage';
 import ShareButton from '../../components/ShareButton';
 import AddRecipeModal from '../../components/AddRecipeModal';
 import useAppContext from '../../hooks/useAppContext';
@@ -41,6 +42,7 @@ export default function RecipesTab({ apiKey, settings }) {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState(null);
   const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   const pantryItems = pantry.items;
 
@@ -89,6 +91,17 @@ export default function RecipesTab({ apiKey, settings }) {
   const canGenerate = mode === 'craving' ? craving.trim().length > 0
     : mode === 'pantry' ? (useAllPantry ? pantryItems.length > 0 : selectedItems.size > 0)
     : true;
+
+  if (selectedRecipe) {
+    return (
+      <RecipeDetailPage
+        recipe={selectedRecipe}
+        onBack={() => setSelectedRecipe(null)}
+        settings={settings}
+        showSaveButton={true}
+      />
+    );
+  }
 
   return (
     <div className="recipes-tab">
@@ -237,7 +250,7 @@ export default function RecipesTab({ apiKey, settings }) {
         )}
 
         {recipes.map((recipe, i) => (
-          <RecipeCard key={recipe.id} recipe={recipe} settings={settings} index={i} />
+          <RecipeCard key={recipe.id} recipe={recipe} settings={settings} index={i} onOpenDetail={setSelectedRecipe} />
         ))}
       </div>
 

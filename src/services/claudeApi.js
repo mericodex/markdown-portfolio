@@ -1,4 +1,7 @@
-const API_URL = 'https://api.anthropic.com/v1/messages';
+// In dev, route through Vite proxy to avoid CORS/firewall blocks
+const API_URL = import.meta.env.DEV
+  ? '/api/anthropic/v1/messages'
+  : 'https://api.anthropic.com/v1/messages';
 const MODEL   = 'claude-opus-4-6';
 
 async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
@@ -164,24 +167,32 @@ export async function identifyPantryItem({ apiKey, photoBase64, mimeType = 'imag
 // ── Import recipe from URL ────────────────────────────────────────────────
 
 export async function importRecipeFromUrl({ apiKey, url }) {
-  // Use CORS proxy to fetch page content
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  let text = '';
-  try {
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('Could not fetch page');
-    const html = await res.text();
-    // Strip HTML tags, collapse whitespace
-    text = html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim()
-      .slice(0, 5000);
-  } catch {
-    throw new Error('Could not load the page. Try pasting the recipe text manually instead.');
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+
+  let html = '';
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) { html = await res.text(); break; }
+    } catch { /* try next */ }
   }
+
+  if (!html) {
+    throw new Error('Could not load the page through any proxy. Try pasting the recipe text manually instead.');
+  }
+
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+    .slice(0, 5000);
+
   return importRecipeFromText({ apiKey, text });
 }
 

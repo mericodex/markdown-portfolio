@@ -1,0 +1,345 @@
+/* ── Recipe Detail Page ─────────────────────────────────────────────── */
+
+.rdp-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--color-surface);
+  animation: slideUp 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ── Hero ── */
+.rdp-hero {
+  position: relative;
+  min-height: 200px;
+  background: linear-gradient(160deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 70%, var(--color-accent)) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  color: #fff;
+}
+
+.rdp-back-btn {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+  transition: background var(--transition);
+}
+.rdp-back-btn:hover { background: rgba(255,255,255,0.22); }
+
+.rdp-hero-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.rdp-hero-content {
+  padding-top: 60px;
+}
+
+.rdp-hero-category {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 6px;
+  font-family: var(--font-sans);
+}
+
+.rdp-hero-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+/* ── Body ── */
+.rdp-body {
+  flex: 1;
+  padding: 0 16px;
+  overflow-y: auto;
+}
+
+/* ── Meta grid ── */
+.rdp-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.rdp-meta-cell {
+  background: var(--color-card);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rdp-meta-full {
+  grid-column: 1 / -1;
+}
+
+.rdp-meta-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-sans);
+}
+
+.rdp-meta-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.rdp-servings-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rdp-servings-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.rdp-servings-btn:hover { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+
+.rdp-servings-val {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ── Section ── */
+.rdp-section {
+  margin-bottom: 24px;
+}
+
+.rdp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.rdp-section-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.rdp-section-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.rdp-clear-btn {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+/* ── Ingredients ── */
+.rdp-ingredients {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-card);
+}
+
+.rdp-ingredient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.rdp-ingredient:last-child { border-bottom: none; }
+.rdp-ingredient:hover { background: var(--color-surface-alt); }
+
+.rdp-ingredient-done {
+  background: var(--color-surface-alt);
+  opacity: 0.5;
+}
+.rdp-ingredient-done .rdp-ing-name { text-decoration: line-through; }
+
+.rdp-check-circle {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  background: var(--color-surface-alt);
+}
+
+.rdp-check-circle-done {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
+.rdp-ing-qty {
+  font-weight: 600;
+  color: var(--color-accent);
+  min-width: 80px;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.01em;
+  font-family: var(--font-sans);
+}
+
+.rdp-ing-name {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  transition: color var(--transition);
+}
+
+.rdp-all-checked {
+  margin-top: 10px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Steps ── */
+.rdp-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rdp-step {
+  display: flex;
+  gap: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+  align-items: flex-start;
+}
+.rdp-step:hover { border-color: var(--color-primary); }
+
+.rdp-step-done {
+  border-color: var(--color-success) !important;
+  background: color-mix(in srgb, var(--color-success) 6%, var(--color-card));
+}
+
+.rdp-step-num {
+  min-width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: all var(--transition);
+}
+
+.rdp-step-num-done {
+  background: var(--color-success);
+  opacity: 1;
+}
+
+.rdp-step-text {
+  font-size: var(--font-size-sm);
+  line-height: 1.65;
+  color: var(--color-text);
+  padding-top: 4px;
+  transition: font-weight var(--transition), color var(--transition);
+}
+
+.rdp-step-done .rdp-step-text {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ── Actions ── */
+.rdp-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.rdp-saved-msg {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rdp-save-panel {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

@@ -7,7 +7,7 @@ import { scaleIngredients } from '../../utils/scaling';
 import { formatTime } from '../../utils/formatters';
 import useAppContext from '../../hooks/useAppContext';
 
-export default function RecipeCard({ recipe, settings, index, showSaveButton = true }) {
+export default function RecipeCard({ recipe, settings, index, showSaveButton = true, onOpenDetail }) {
   const { cookbook, cookbookDispatch } = useAppContext();
   const [expanded, setExpanded]     = useState(false);
   const [servings, setServings]     = useState(recipe.servings ?? 4);
@@ -52,7 +52,7 @@ export default function RecipeCard({ recipe, settings, index, showSaveButton = t
         {/* Card header */}
         <button
           className="recipe-card-header"
-          onClick={() => setExpanded(e => !e)}
+          onClick={() => onOpenDetail ? onOpenDetail(recipe) : setExpanded(e => !e)}
           aria-expanded={expanded}
         >
           <div className="recipe-card-header-left">

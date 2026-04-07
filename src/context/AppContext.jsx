@@ -1,4 +1,4 @@
-import { createContext, useReducer, useEffect, useCallback } from 'react';
+import { createContext, useReducer, useEffect } from 'react';
 import { cookbookReducer, initialCookbookState } from './reducers/cookbookReducer';
 import { pantryReducer, initialPantryState } from './reducers/pantryReducer';
 import { mealPlanReducer, initialMealPlanState } from './reducers/mealPlanReducer';
@@ -35,10 +35,16 @@ export function AppProvider({ children }) {
     mergeWithDefaults(persisted.shopping, initialShoppingState)
   );
 
-  // Persist on every state change (debounced via useEffect)
+  // Persist on every state change
   useEffect(() => {
     saveState(STORAGE_KEY, { cookbook, pantry, mealPlan, shopping });
   }, [cookbook, pantry, mealPlan, shopping]);
+
+  // Migrate users who have only the old "My Recipes" default cookbook
+  useEffect(() => {
+    cookbookDispatch({ type: 'MIGRATE_DEFAULT_COOKBOOKS' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Settings live separately so they don't trigger full re-saves
   // They are read/written directly from localStorage by SettingsTab via useLocalStorage

@@ -1,5 +1,6 @@
+/* ── Recipe card ──────────────────────────────────────────────────────── */
 .recipe-card {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   transition: box-shadow var(--transition);
 }
 .recipe-card-expanded { box-shadow: var(--shadow-md); }
@@ -26,19 +27,21 @@
 }
 
 .recipe-card-index {
-  width: 28px; height: 28px;
+  width: 26px; height: 26px;
   background: var(--color-primary);
   color: #fff;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .recipe-card-title {
-  font-size: var(--font-size-base);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--color-text);
   line-height: 1.3;
 }
@@ -47,6 +50,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   margin-top: 2px;
+  letter-spacing: 0.01em;
 }
 
 .recipe-card-header-right {
@@ -56,17 +60,16 @@
   flex-shrink: 0;
 }
 
-.recipe-bf-badge { font-size: 10px; }
-
 .recipe-card-chevron {
-  font-size: var(--font-size-xs);
+  font-size: 9px;
   color: var(--color-text-muted);
+  opacity: 0.6;
 }
 
 .recipe-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
   padding: 0 16px 12px;
 }
 
@@ -81,20 +84,9 @@
 .recipe-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  line-height: 1.6;
-  padding-top: 12px;
-}
-
-.recipe-bf-note {
-  display: flex;
-  gap: 8px;
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  font-size: var(--font-size-sm);
-  color: #155724;
-  line-height: 1.5;
+  line-height: 1.65;
+  padding-top: 14px;
+  font-style: italic;
 }
 
 .servings-row {
@@ -104,6 +96,7 @@
   background: var(--color-surface-alt);
   border-radius: var(--radius-md);
   padding: 10px 14px;
+  border: 1px solid var(--color-border);
 }
 
 .servings-controls {
@@ -114,39 +107,47 @@
 
 .servings-count {
   font-size: var(--font-size-xl);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-primary);
-  min-width: 32px;
+  min-width: 28px;
   text-align: center;
+  font-family: var(--font-display);
 }
 
 .recipe-section-title {
-  font-size: var(--font-size-sm);
+  font-size: 9px;
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .ingredients-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
 }
 
 .ingredient-item {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   font-size: var(--font-size-sm);
-  padding: 4px 0;
+  padding: 7px 0;
   border-bottom: 1px solid var(--color-border);
+  align-items: baseline;
 }
+.ingredient-item:last-child { border-bottom: none; }
+
 .ingredient-qty {
-  font-weight: 700;
-  color: var(--color-primary);
+  font-weight: 600;
+  color: var(--color-accent);
   min-width: 80px;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.01em;
 }
 .ingredient-name { color: var(--color-text); }
 
@@ -155,60 +156,63 @@
   flex-direction: column;
   gap: 10px;
   padding-left: 0;
-  counter-reset: step-counter;
   list-style: none;
+  counter-reset: step-counter;
 }
 
 .step-item {
   display: flex;
   gap: 12px;
   font-size: var(--font-size-sm);
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-text);
   counter-increment: step-counter;
 }
 .step-item::before {
   content: counter(step-counter);
-  min-width: 24px; height: 24px;
+  min-width: 22px; height: 22px;
   background: var(--color-primary);
   color: #fff;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 600;
   flex-shrink: 0;
   margin-top: 2px;
+  opacity: 0.8;
 }
 
 /* Nutrition grid */
 .nutrition-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  position: relative;
+  gap: 6px;
 }
 
 .nutrition-cell {
   background: var(--color-surface-alt);
   border-radius: var(--radius-md);
-  padding: 10px;
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  border: 1px solid var(--color-border);
 }
 
 .nutrition-value {
   font-size: var(--font-size-base);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-primary);
+  font-family: var(--font-display);
 }
 
 .nutrition-label {
-  font-size: var(--font-size-xs);
+  font-size: 9px;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
 .nutrition-note {
@@ -220,7 +224,7 @@
 
 .recipe-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -231,15 +235,16 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border: 1px solid var(--color-border);
 }
 
-/* Generate controls */
+/* ── Recipe tab controls ── */
 .recipes-tab { display: flex; flex-direction: column; gap: 0; }
 
 .recipes-controls {
   background: var(--color-card);
   border-bottom: 1px solid var(--color-border);
-  padding: 14px 16px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -257,13 +262,14 @@
 .mode-tab-btn {
   padding: 6px 14px;
   border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: 600;
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   color: var(--color-text-muted);
-  background: var(--color-card);
+  background: transparent;
   cursor: pointer;
   transition: all var(--transition);
+  letter-spacing: 0.02em;
 }
 .mode-tab-btn.active {
   background: var(--color-primary);
@@ -286,13 +292,13 @@
 .pantry-checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-height: 180px;
+  gap: 4px;
+  max-height: 160px;
   overflow-y: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 8px;
-  background: var(--color-card);
+  background: var(--color-surface-alt);
 }
 
 .pantry-checkbox-item {
@@ -303,12 +309,12 @@
   cursor: pointer;
   padding: 2px 4px;
 }
-.pantry-checkbox-item input { accent-color: var(--color-primary); width: 16px; height: 16px; }
+.pantry-checkbox-item input { accent-color: var(--color-primary); width: 15px; height: 15px; }
 
 .recipes-list {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 14px;
   padding-bottom: calc(var(--tab-bar-height) + 16px);
 }
 
@@ -318,8 +324,9 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 60px 24px;
+  padding: 64px 24px;
   color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .dietary-options {
@@ -330,15 +337,15 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 10px;
-  margin-top: 8px;
 }
 
 .recipes-error {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background: #FDE8E6;
+  border: 1px solid #F5C6C2;
+  color: #7A1C18;
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 12px 16px;
   font-size: var(--font-size-sm);
-  margin: 16px;
+  margin: 14px;
+  line-height: 1.5;
 }

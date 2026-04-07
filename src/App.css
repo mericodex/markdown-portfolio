@@ -1,5 +1,4 @@
-/* ── App shell layout ───────────────────────────────────────────────────── */
-
+/* ── App shell layout ─────────────────────────────────────────────────── */
 .app-wrapper {
   display: flex;
   flex-direction: column;
@@ -18,11 +17,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  box-shadow: var(--shadow-md);
+  padding: 0 14px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
 }
 
-/* Centered title block */
 .app-header-center {
   display: flex;
   align-items: center;
@@ -30,49 +28,56 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  pointer-events: none; /* let clicks pass through to burger */
+  pointer-events: none;
 }
 
 .app-header-center svg {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .app-header-titles { text-align: center; }
 
 .app-header-title {
-  font-size: var(--font-size-lg);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.1;
 }
 
 .app-header-subtitle {
-  font-size: var(--font-size-xs);
-  opacity: 0.8;
-  letter-spacing: 0.03em;
+  font-size: 9px;
+  opacity: 0.55;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-weight: 500;
 }
 
 /* ── Burger button ── */
 .burger-btn {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   padding: 8px;
   border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.15);
+  background: transparent;
   cursor: pointer;
   border: none;
   z-index: 1;
   flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity var(--transition);
 }
-.burger-btn:hover { background: rgba(255,255,255,0.25); }
+.burger-btn:hover { opacity: 1; }
 
 .burger-line {
   display: block;
-  width: 20px;
-  height: 2px;
+  width: 18px;
+  height: 1.5px;
   background: #fff;
   border-radius: 2px;
 }
@@ -81,9 +86,10 @@
 .burger-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.5);
   z-index: 150;
   animation: fadeIn 150ms ease;
+  backdrop-filter: blur(2px);
 }
 
 .burger-drawer {
@@ -91,13 +97,13 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: min(280px, 85vw);
+  width: min(280px, 82vw);
   background: var(--color-card);
   z-index: 151;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-lg);
-  animation: slideRight 200ms ease;
+  animation: slideRight 220ms cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
 }
 
@@ -110,56 +116,63 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px;
+  padding: 18px 16px 16px;
   background: var(--color-primary);
   color: #fff;
 }
 
 .burger-drawer-header svg {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .burger-drawer-title {
   flex: 1;
-  font-size: var(--font-size-lg);
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .burger-close {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
-  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  width: 28px; height: 28px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   cursor: pointer;
   border: none;
   flex-shrink: 0;
+  transition: all var(--transition);
 }
+.burger-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
 .burger-nav {
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .burger-nav-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 20px;
-  font-size: var(--font-size-base);
+  padding: 13px 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
   color: var(--color-text);
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   transition: background var(--transition);
+  letter-spacing: 0.01em;
 }
 .burger-nav-item:hover { background: var(--color-surface-alt); }
-.burger-nav-item span:first-child { font-size: 1.3rem; width: 28px; text-align: center; }
+.burger-nav-item span:first-child { font-size: 1.1rem; width: 24px; text-align: center; opacity: 0.8; }
 
 .burger-divider {
   height: 1px;
@@ -169,28 +182,32 @@
 
 /* ── PWA install banner ── */
 .pwa-banner {
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--color-primary);
+  color: rgba(255,255,255,0.9);
   padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-sans);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 .pwa-banner-text { flex: 1; }
 .pwa-banner button {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.15);
   color: #fff;
-  padding: 5px 12px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 .pwa-banner-dismiss {
   background: none !important;
   padding: 4px !important;
-  opacity: 0.7;
-  font-size: 1.2rem !important;
+  opacity: 0.5;
+  font-size: 1rem !important;
+  border: none !important;
 }
 
 /* ── Main content ── */
@@ -212,7 +229,6 @@
   background: var(--color-card);
   border-top: 1px solid var(--color-border);
   display: flex;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -225,39 +241,43 @@
   gap: 3px;
   padding: 8px 4px;
   color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
+  font-size: 9px;
   font-weight: 500;
+  letter-spacing: 0.03em;
   transition: color var(--transition);
   position: relative;
   cursor: pointer;
   background: none;
   border: none;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
 }
 
 .tab-btn.active {
   color: var(--color-primary);
 }
 
-.tab-btn.active::before {
+.tab-btn.active::after {
   content: '';
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 32px;
-  height: 3px;
-  background: var(--color-primary);
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  width: 20px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
 }
 
 .tab-btn-icon {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   line-height: 1;
 }
 
 .tab-btn-label {
-  font-size: 10px;
+  font-size: 9px;
   white-space: nowrap;
+  letter-spacing: 0.05em;
 }
 
 /* ── API key setup screen ── */
@@ -267,34 +287,38 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
+  padding: 40px 28px;
   gap: 20px;
   text-align: center;
   background: var(--color-surface);
 }
 
 .setup-screen .setup-logo {
-  font-size: 4rem;
-  margin-bottom: 8px;
+  font-size: 3.5rem;
+  margin-bottom: 4px;
+  opacity: 0.85;
 }
 
 .setup-screen h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: 800;
-  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
 }
 
-.setup-screen p {
+.setup-screen > p {
   color: var(--color-text-muted);
-  max-width: 320px;
-  line-height: 1.6;
+  max-width: 300px;
+  line-height: 1.65;
+  font-size: var(--font-size-sm);
 }
 
 .setup-screen .api-input-row {
   display: flex;
   gap: 8px;
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
 }
 
 .setup-screen .api-input-row input {
@@ -305,5 +329,6 @@
 .setup-hint {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  max-width: 360px;
+  max-width: 320px;
+  line-height: 1.6;
 }
