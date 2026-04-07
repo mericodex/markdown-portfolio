@@ -41,7 +41,6 @@ function BurgerMenu({ isOpen, onClose, apiKey, settings, setSettings, onApiKeyRe
       <div className="burger-backdrop" onClick={onClose} />
       <div className="burger-drawer">
         <div className="burger-drawer-header">
-          <LogoSVG />
           <span className="burger-drawer-title">Mama's Kitchen</span>
           <button className="burger-close" onClick={onClose} aria-label="Close menu">✕</button>
         </div>
@@ -158,7 +157,6 @@ function AppShell() {
         </button>
 
         <div className="app-header-center">
-          <LogoSVG />
           <div className="app-header-titles">
             <div className="app-header-title">Mama's Kitchen</div>
             <div className="app-header-subtitle">AI Recipe Companion</div>

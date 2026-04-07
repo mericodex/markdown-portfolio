@@ -247,7 +247,7 @@
   justify-content: center;
   gap: 2px;
   padding: 6px 4px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.72);
   font-size: 8px;
   font-weight: 600;
   transition: all var(--transition);
