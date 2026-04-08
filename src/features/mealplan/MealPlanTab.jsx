@@ -1,9 +1,12 @@
 import { useState, useRef } from 'react';
 import MealSlot from './MealSlot';
 import ShareButton from '../../components/ShareButton';
+import Modal from '../../components/Modal';
 import { MEAL_DAYS, MEAL_TYPES } from '../../context/reducers/mealPlanReducer';
 import useAppContext from '../../hooks/useAppContext';
 import './mealplan.css';
+
+const LIBRARY_CATS = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Any'];
 
 function getShareText(week, label) {
   const lines = [`📅 ${label}\n`];
@@ -18,18 +21,115 @@ function getShareText(week, label) {
   return lines.join('\n\n');
 }
 
+function MealLibraryModal({ isOpen, onClose, library, dispatch, recipes }) {
+  const [newLabel, setNewLabel]     = useState('');
+  const [newCat, setNewCat]         = useState('Any');
+  const [newRecipeId, setNewRecipeId] = useState('');
+
+  function handleAdd() {
+    const label = newLabel.trim();
+    if (!label) return;
+    dispatch({
+      type: 'ADD_MEAL_TEMPLATE',
+      template: { label, category: newCat, recipeId: newRecipeId || null }
+    });
+    setNewLabel('');
+    setNewCat('Any');
+    setNewRecipeId('');
+  }
+
+  const grouped = LIBRARY_CATS.reduce((acc, cat) => {
+    acc[cat] = library.filter(t => t.category === cat);
+    return acc;
+  }, {});
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Meal Library">
+      {/* Add form */}
+      <div className="lib-add-section">
+        <div className="lib-add-title">Add Meal Template</div>
+        <div className="form-group">
+          <label className="label">Meal name</label>
+          <input
+            className="input"
+            placeholder="e.g. Overnight Oats"
+            value={newLabel}
+            onChange={e => setNewLabel(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div className="form-group" style={{ flex: 1 }}>
+            <label className="label">Category</label>
+            <select className="select" value={newCat} onChange={e => setNewCat(e.target.value)}>
+              {LIBRARY_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group" style={{ flex: 2 }}>
+            <label className="label">Linked recipe (optional)</label>
+            <select className="select" value={newRecipeId} onChange={e => setNewRecipeId(e.target.value)}>
+              <option value="">No linked recipe</option>
+              {recipes.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}
+            </select>
+          </div>
+        </div>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={handleAdd}
+          disabled={!newLabel.trim()}
+        >+ Add to Library</button>
+      </div>
+
+      {/* Template list grouped by category */}
+      {library.length === 0 ? (
+        <p className="lib-empty-msg">Your library is empty. Add your first meal template above.</p>
+      ) : (
+        <div className="lib-manage-list">
+          {LIBRARY_CATS.map(cat => {
+            const items = grouped[cat];
+            if (!items.length) return null;
+            return (
+              <div key={cat} className="lib-manage-group">
+                <div className="lib-manage-group-title">{cat}</div>
+                {items.map(t => {
+                  const linked = t.recipeId ? recipes.find(r => r.id === t.recipeId) : null;
+                  return (
+                    <div key={t.id} className="lib-manage-item">
+                      <div className="lib-manage-item-info">
+                        <span className="lib-manage-item-name">{t.label}</span>
+                        {linked && <span className="lib-manage-item-recipe">📖 {linked.title}</span>}
+                      </div>
+                      <button
+                        className="lib-manage-item-delete"
+                        onClick={() => dispatch({ type: 'DELETE_MEAL_TEMPLATE', id: t.id })}
+                        title="Remove"
+                        aria-label="Remove"
+                      >✕</button>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 export default function MealPlanTab({ apiKey }) {
-  const { mealPlan, mealPlanDispatch } = useAppContext();
+  const { mealPlan, mealPlanDispatch, cookbook } = useAppContext();
   const [editingId, setEditingId]   = useState(null);
   const [editLabel, setEditLabel]   = useState('');
+  const [showLibrary, setShowLibrary] = useState(false);
   const weekTabsRef = useRef(null);
 
   const activeWeek = mealPlan.weeks.find(w => w.id === mealPlan.activeWeekId) ?? mealPlan.weeks[0];
   const weekData   = activeWeek?.data ?? {};
+  const library    = mealPlan.library ?? [];
 
   function addWeek() {
     mealPlanDispatch({ type: 'ADD_WEEK' });
-    // scroll week tab bar to the end after render
     setTimeout(() => {
       if (weekTabsRef.current) weekTabsRef.current.scrollLeft = weekTabsRef.current.scrollWidth;
     }, 50);
@@ -97,7 +197,6 @@ export default function MealPlanTab({ apiKey }) {
               ) : (
                 <span className="mealplan-week-tab-label">{w.label}</span>
               )}
-              {/* Rename / remove only when tab is active */}
               {w.id === mealPlan.activeWeekId && editingId !== w.id && (
                 <span className="mealplan-week-tab-actions">
                   <span
@@ -126,6 +225,9 @@ export default function MealPlanTab({ apiKey }) {
       <div className="mealplan-toolbar">
         <span className="mealplan-toolbar-title">{activeWeek?.label ?? 'Meal Plan'}</span>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => setShowLibrary(true)}>
+            📚 Library{library.length > 0 ? ` (${library.length})` : ''}
+          </button>
           <ShareButton
             title={activeWeek?.label ?? 'Meal Plan'}
             getText={() => getShareText(weekData, activeWeek?.label ?? 'Meal Plan')}
@@ -160,6 +262,15 @@ export default function MealPlanTab({ apiKey }) {
           </div>
         ))}
       </div>
+
+      {/* ── Meal Library modal ── */}
+      <MealLibraryModal
+        isOpen={showLibrary}
+        onClose={() => setShowLibrary(false)}
+        library={library}
+        dispatch={mealPlanDispatch}
+        recipes={cookbook.recipes}
+      />
 
     </div>
   );

@@ -138,3 +138,33 @@ html[data-palette="rose"] {
   --color-text-muted:    #704838;
   --tab-overlay: rgba(138,26,20,0.95);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE
+   Uses color-mix to tint surfaces with the current palette's
+   primary colour, so dark mode works across all palettes.
+   html[data-theme="dark"] has specificity 0,1,1 — same as
+   the palette selectors above — and placed last so it wins
+   by cascade order.
+   ═══════════════════════════════════════════════════════════ */
+
+html[data-theme="dark"] {
+  --color-surface:     color-mix(in srgb, var(--color-primary) 14%, #0D0D0D);
+  --color-surface-alt: color-mix(in srgb, var(--color-primary) 22%, #141414);
+  --color-card:        color-mix(in srgb, var(--color-primary) 10%, #181818);
+  --color-border:      color-mix(in srgb, var(--color-primary) 28%, #282828);
+  --color-text:        #E8E4DC;
+  --color-text-muted:  #7A7670;
+}
+
+/* System dark mode (when no explicit theme is set) */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --color-surface:     color-mix(in srgb, var(--color-primary) 14%, #0D0D0D);
+    --color-surface-alt: color-mix(in srgb, var(--color-primary) 22%, #141414);
+    --color-card:        color-mix(in srgb, var(--color-primary) 10%, #181818);
+    --color-border:      color-mix(in srgb, var(--color-primary) 28%, #282828);
+    --color-text:        #E8E4DC;
+    --color-text-muted:  #7A7670;
+  }
+}

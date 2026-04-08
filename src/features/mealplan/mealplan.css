@@ -306,6 +306,160 @@
   border-color: var(--color-primary);
 }
 
+/* ── Add meal tabs (Cookbook / Library / Custom) ── */
+.add-meal-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.add-meal-tab {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-card);
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.add-meal-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* ── Library filter chips ── */
+.lib-filter-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.lib-filter-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-card);
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+}
+.lib-filter-chip.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* ── Library pick list (in MealSlot add modal) ── */
+.lib-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 4px;
+}
+.lib-pick-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.lib-pick-item:hover { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 4%, var(--color-card)); }
+.lib-pick-item.selected { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 8%, var(--color-card)); }
+.lib-pick-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lib-pick-name { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text); }
+.lib-pick-recipe { font-size: 11px; color: var(--color-text-muted); }
+.lib-pick-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.lib-empty-msg {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 20px 0;
+  line-height: 1.6;
+}
+
+/* ── Library management modal ── */
+.lib-add-section {
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lib-add-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+.lib-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lib-manage-group-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  margin-bottom: 6px;
+}
+.lib-manage-group {
+  display: flex;
+  flex-direction: column;
+}
+.lib-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.lib-manage-item:last-child { border-bottom: none; }
+.lib-manage-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.lib-manage-item-name { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text); }
+.lib-manage-item-recipe { font-size: 11px; color: var(--color-text-muted); }
+.lib-manage-item-delete {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.lib-manage-item-delete:hover { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 8%, transparent); opacity: 1; }
+
 /* ── Print ── */
 @media print {
   .mealplan-weeks-bar,

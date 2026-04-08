@@ -1,7 +1,8 @@
-// In dev, route through Vite proxy to avoid CORS/firewall blocks
+// Dev: Vite proxy at /api/anthropic → api.anthropic.com (avoids CORS in local dev)
+// Prod: Vercel serverless function at /api/anthropic (avoids firewall/CORS on any device)
 const API_URL = import.meta.env.DEV
   ? '/api/anthropic/v1/messages'
-  : 'https://api.anthropic.com/v1/messages';
+  : '/api/anthropic';
 const MODEL   = 'claude-opus-4-6';
 
 async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
@@ -14,12 +15,12 @@ async function callClaude(apiKey, systemPrompt, userContent, maxTokens = 2000) {
     ? [{ role: 'user', content: userContent }]
     : [{ role: 'user', content: userContent }];
 
-  // Only send the browser header when calling the API directly (not through proxy)
   const headers = {
     'Content-Type': 'application/json',
     'x-api-key': key,
     'anthropic-version': '2023-06-01',
-    'anthropic-dangerous-allow-browser': 'true',
+    // Required when calling Anthropic directly from the browser (dev only)
+    ...(import.meta.env.DEV && { 'anthropic-dangerous-allow-browser': 'true' }),
   };
 
   let res;

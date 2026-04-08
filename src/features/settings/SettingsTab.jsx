@@ -29,6 +29,19 @@ export default function SettingsTab({ apiKey, settings, setSettings, onApiKeyRes
       <div className="settings-section">
         <div className="settings-section-title">Appearance</div>
 
+        <div className="settings-row">
+          <div className="settings-row-label">Theme</div>
+          <div className="toggle-switch">
+            {[{id:'system',label:'System'},{id:'light',label:'Light'},{id:'dark',label:'Dark'}].map(t => (
+              <button
+                key={t.id}
+                className={`toggle-option${(settings?.theme ?? 'system') === t.id ? ' active' : ''}`}
+                onClick={() => update('theme', t.id)}
+              >{t.label}</button>
+            ))}
+          </div>
+        </div>
+
         <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
           <div className="settings-row-label">Colour Palette</div>
           <div className="palette-swatches">

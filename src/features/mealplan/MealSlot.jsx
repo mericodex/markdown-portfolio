@@ -4,35 +4,73 @@ import useAppContext from '../../hooks/useAppContext';
 import { suggestMeal } from '../../services/claudeApi';
 
 const PORTIONS = ['1 portion', '½ portion', '2 portions', 'Side'];
+const MEAL_CATS = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Any'];
 
 const MealSlot = memo(function MealSlot({ day, meal, apiKey, weekId, weekData }) {
-  const { mealPlanDispatch, cookbook, pantry } = useAppContext();
+  const { mealPlanDispatch, cookbook, pantry, mealPlan } = useAppContext();
   const items = weekData?.[day]?.[meal] ?? [];
 
-  const [showAdd, setShowAdd]       = useState(false);
-  const [addType, setAddType]       = useState('recipe');
-  const [recipeId, setRecipeId]     = useState('');
+  const [showAdd, setShowAdd]         = useState(false);
+  const [addType, setAddType]         = useState('recipe'); // 'recipe' | 'library' | 'custom'
+  const [recipeId, setRecipeId]       = useState('');
   const [customLabel, setCustomLabel] = useState('');
-  const [portion, setPortion]       = useState('1 portion');
-  const [suggesting, setSuggesting] = useState(false);
+  const [portion, setPortion]         = useState('1 portion');
+  const [suggesting, setSuggesting]   = useState(false);
+
+  // Library tab state
+  const library    = mealPlan.library ?? [];
+  const [libFilter, setLibFilter]     = useState(meal); // default filter = current meal type
+  const [selectedLibId, setSelectedLibId] = useState('');
+
+  const filteredLib = libFilter === 'All'
+    ? library
+    : library.filter(t => t.category === libFilter || t.category === 'Any');
 
   function dispatch(type, extra = {}) {
     mealPlanDispatch({ type, day, meal, weekId, ...extra });
   }
 
-  function handleAdd() {
-    const label = addType === 'recipe'
-      ? cookbook.recipes.find(r => r.id === recipeId)?.title ?? 'Recipe'
-      : customLabel.trim();
-    if (!label) return;
-    dispatch('ADD_MEAL_ITEM', {
-      item: { type: addType, recipeId: addType === 'recipe' ? recipeId : undefined, label, portion }
-    });
-    setShowAdd(false);
+  function resetForm() {
     setCustomLabel('');
     setRecipeId('');
+    setSelectedLibId('');
     setPortion('1 portion');
+    setAddType('recipe');
+    setLibFilter(meal);
   }
+
+  function handleAdd() {
+    let label, recipeIdToUse, typeToUse;
+
+    if (addType === 'recipe') {
+      const r = cookbook.recipes.find(r => r.id === recipeId);
+      if (!r) return;
+      label = r.title;
+      recipeIdToUse = recipeId;
+      typeToUse = 'recipe';
+    } else if (addType === 'library') {
+      const t = library.find(t => t.id === selectedLibId);
+      if (!t) return;
+      label = t.label;
+      recipeIdToUse = t.recipeId || undefined;
+      typeToUse = t.recipeId ? 'recipe' : 'custom';
+    } else {
+      label = customLabel.trim();
+      if (!label) return;
+      typeToUse = 'custom';
+    }
+
+    dispatch('ADD_MEAL_ITEM', {
+      item: { type: typeToUse, recipeId: recipeIdToUse, label, portion }
+    });
+    setShowAdd(false);
+    resetForm();
+  }
+
+  const isAddDisabled =
+    addType === 'recipe'  ? !recipeId :
+    addType === 'library' ? !selectedLibId :
+    !customLabel.trim();
 
   async function handleAISuggest(e) {
     e.stopPropagation();
@@ -75,20 +113,27 @@ const MealSlot = memo(function MealSlot({ day, meal, apiKey, weekId, weekData })
           </div>
         ))}
 
-        <button className="meal-slot-add" onClick={() => setShowAdd(true)}>+ Add</button>
+        <button className="meal-slot-add" onClick={() => { resetForm(); setShowAdd(true); }}>+ Add</button>
       </div>
 
       <Modal isOpen={showAdd} onClose={() => setShowAdd(false)} title={`${day} — ${meal}`}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <button className={`btn btn-sm ${addType === 'recipe' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAddType('recipe')}>
-            📖 From Cookbook
-          </button>
-          <button className={`btn btn-sm ${addType === 'custom' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAddType('custom')}>
-            ✏️ Custom
-          </button>
+        {/* Tab switcher */}
+        <div className="add-meal-tabs">
+          {[
+            { id: 'recipe',  label: '📖 Cookbook' },
+            { id: 'library', label: '📚 Library' },
+            { id: 'custom',  label: '✏️ Custom' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              className={`add-meal-tab${addType === tab.id ? ' active' : ''}`}
+              onClick={() => setAddType(tab.id)}
+            >{tab.label}</button>
+          ))}
         </div>
 
-        {addType === 'recipe' ? (
+        {/* ── From Cookbook ── */}
+        {addType === 'recipe' && (
           <div className="form-group">
             <label className="label">Recipe</label>
             <select className="select" value={recipeId} onChange={e => setRecipeId(e.target.value)}>
@@ -98,7 +143,55 @@ const MealSlot = memo(function MealSlot({ day, meal, apiKey, weekId, weekData })
               ))}
             </select>
           </div>
-        ) : (
+        )}
+
+        {/* ── From Library ── */}
+        {addType === 'library' && (
+          <div>
+            <div className="lib-filter-row">
+              {MEAL_CATS.map(cat => (
+                <button
+                  key={cat}
+                  className={`lib-filter-chip${libFilter === cat ? ' active' : ''}`}
+                  onClick={() => setLibFilter(cat)}
+                >{cat}</button>
+              ))}
+            </div>
+            {filteredLib.length === 0 ? (
+              <p className="lib-empty-msg">
+                {library.length === 0
+                  ? 'Your library is empty. Use "Meal Library" in the toolbar to add meals.'
+                  : 'No meals match this filter.'}
+              </p>
+            ) : (
+              <div className="lib-pick-list">
+                {filteredLib.map(t => {
+                  const linkedRecipe = t.recipeId
+                    ? cookbook.recipes.find(r => r.id === t.recipeId)
+                    : null;
+                  return (
+                    <div
+                      key={t.id}
+                      className={`lib-pick-item${selectedLibId === t.id ? ' selected' : ''}`}
+                      onClick={() => setSelectedLibId(t.id)}
+                    >
+                      <div className="lib-pick-info">
+                        <span className="lib-pick-name">{t.label}</span>
+                        {linkedRecipe && (
+                          <span className="lib-pick-recipe">📖 {linkedRecipe.title}</span>
+                        )}
+                      </div>
+                      <span className="lib-pick-cat">{t.category}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Custom ── */}
+        {addType === 'custom' && (
           <div className="form-group">
             <label className="label">Meal description</label>
             <input
@@ -112,6 +205,7 @@ const MealSlot = memo(function MealSlot({ day, meal, apiKey, weekId, weekData })
           </div>
         )}
 
+        {/* Portion */}
         <div className="form-group">
           <label className="label">Portion</label>
           <div className="portion-options">
@@ -128,7 +222,7 @@ const MealSlot = memo(function MealSlot({ day, meal, apiKey, weekId, weekData })
         <button
           className="btn btn-primary"
           onClick={handleAdd}
-          disabled={addType === 'recipe' ? !recipeId : !customLabel.trim()}
+          disabled={isAddDisabled}
           style={{ width: '100%', justifyContent: 'center' }}
         >
           Add to {meal}

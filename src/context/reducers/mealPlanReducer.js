@@ -17,7 +17,8 @@ function newWeek(label) {
 
 export const initialMealPlanState = {
   weeks: [{ id: 'week-1', label: 'Week 1', data: emptyWeekData() }],
-  activeWeekId: 'week-1'
+  activeWeekId: 'week-1',
+  library: []
 };
 
 // Helper: apply updater fn to the target week's data
@@ -35,9 +36,12 @@ export function mealPlanReducer(state, action) {
   if (!state.weeks) {
     state = {
       weeks: [{ id: 'week-1', label: 'Week 1', data: migrateLegacyWeek(state.week) }],
-      activeWeekId: 'week-1'
+      activeWeekId: 'week-1',
+      library: state.library ?? []
     };
   }
+  // Ensure library exists for states saved before library was introduced
+  if (!state.library) state = { ...state, library: [] };
 
   const targetWeekId = action.weekId ?? state.activeWeekId;
 
@@ -101,6 +105,22 @@ export function mealPlanReducer(state, action) {
     case 'CLEAR_WEEK': {
       return updateWeek(state, targetWeekId, () => emptyWeekData());
     }
+
+    // ── Meal library (reusable templates) ────────────────────────────────
+    case 'ADD_MEAL_TEMPLATE': {
+      const template = { id: crypto.randomUUID(), ...action.template };
+      return { ...state, library: [...state.library, template] };
+    }
+    case 'UPDATE_MEAL_TEMPLATE': {
+      return {
+        ...state,
+        library: state.library.map(t => t.id === action.id ? { ...t, ...action.updates } : t)
+      };
+    }
+    case 'DELETE_MEAL_TEMPLATE': {
+      return { ...state, library: state.library.filter(t => t.id !== action.id) };
+    }
+
     default:
       return state;
   }

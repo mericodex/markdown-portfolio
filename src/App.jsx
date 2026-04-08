@@ -125,6 +125,15 @@ function AppShell() {
   }, [settings.palette]);
 
   useEffect(() => {
+    const theme = settings.theme ?? 'system';
+    if (theme === 'system') {
+      delete document.documentElement.dataset.theme;
+    } else {
+      document.documentElement.dataset.theme = theme;
+    }
+  }, [settings.theme]);
+
+  useEffect(() => {
     const handler = e => { e.preventDefault(); setInstallPrompt(e); setShowBanner(true); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
